@@ -1,0 +1,8 @@
+# сборка — её делает GitHub Actions, в репозитории не хранится
+dist/
+site.html
+portfolio-site.html
+
+node_modules/
+.playwright-mcp/
+.claude/

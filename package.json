@@ -1,0 +1,10 @@
+{
+  "name": "portfolio",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Портфолио Alex — сайт в виде рабочего стола с 3D-сценой",
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build-site.mjs"
+  }
+}
