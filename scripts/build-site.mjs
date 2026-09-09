@@ -5,7 +5,7 @@
 // Запуск:  node scripts/build-site.mjs
 // Выход:   dist/index.html          — сайт (его публикует GitHub Pages)
 //          dist/portfolio-site.html — тот же сайт без обвязки, для артефакта
-import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, rmSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -157,10 +157,84 @@ markup = markup.replace(/<a\s([^>]*?)data-url="([^"]*)"([^>]*?)>/g,
   });
 console.log('href проставлен у', wired, 'ссылок');
 
+// --- картинки: из base64 в отдельные файлы -----------------------
+// Каждый из 15 скриншотов встречался в разметке 2-4 раза (окно, карточка
+// в сетке, подробная карточка) — 1,14 МБ из 1,4 МБ страницы, и три четверти
+// этого веса были чистым дублированием. Отдельные файлы браузер кеширует
+// и грузит по мере надобности.
+const shots = new Map();          // data-URI -> имя файла
+for (const pr of data.projects) {
+  ['shot1', 'shot2', 'shot3'].forEach((k, i) => {
+    const uri = pr[k];
+    if (uri && !shots.has(uri)) shots.set(uri, `${pr.slug}-${i + 1}.jpg`);
+  });
+}
+
+// Размеры из заголовка JPEG: без width/height картинка «прыгает» при загрузке.
+function jpegSize(buf) {
+  let i = 2;
+  while (i + 9 < buf.length) {
+    if (buf[i] !== 0xFF) { i++; continue; }
+    const marker = buf[i + 1];
+    if (marker === 0xD8 || marker === 0x01 || (marker >= 0xD0 && marker <= 0xD7)) { i += 2; continue; }
+    const len = buf.readUInt16BE(i + 2);
+    const isSOF = marker >= 0xC0 && marker <= 0xCF &&
+      marker !== 0xC4 && marker !== 0xC8 && marker !== 0xCC;
+    if (isSOF) return { h: buf.readUInt16BE(i + 5), w: buf.readUInt16BE(i + 7) };
+    i += 2 + len;
+  }
+  return null;
+}
+
+const files = new Map();          // имя файла -> Buffer
+const dims = new Map();           // имя файла -> {w,h}
+for (const [uri, name] of shots) {
+  const buf = Buffer.from(uri.slice(uri.indexOf(',') + 1), 'base64');
+  files.set(name, buf);
+  const d = jpegSize(buf);
+  if (d) dims.set(name, d);
+  else console.warn('  не удалось прочитать размеры', name);
+}
+
+// Переписывает <img>: подставляет src и добавляет атрибуты, без которых
+// картинки грузятся все сразу и двигают вёрстку при появлении.
+function rewriteImages(html, srcFor) {
+  return html.replace(/<img\b([^>]*)>/g, (whole, attrs) => {
+    const m = /\ssrc="([^"]*)"/.exec(attrs);
+    if (!m || !shots.has(m[1])) return whole;
+    const name = shots.get(m[1]);
+    const d = dims.get(name);
+    let out = attrs.replace(m[0], ' ' + srcFor(name));
+    if (d && !/\swidth=/.test(out)) out += ` width="${d.w}" height="${d.h}"`;
+    if (!/\sloading=/.test(out)) out += ' loading="lazy" decoding="async"';
+    return `<img${out}>`;
+  });
+}
+
+// index.html — картинки лежат рядом файлами
+const markupFiles = rewriteImages(markup, (name) => `src="img/${name}"`);
+// portfolio-site.html — артефакт должен быть самодостаточным, поэтому
+// base64 остаётся, но каждая картинка встречается в файле ровно один раз.
+const markupInline = rewriteImages(markup, (name) => `src="" data-img="${name}"`);
+const inlineImgScript = 'var __IMG=' + JSON.stringify(
+  Object.fromEntries([...shots].map(([uri, name]) => [name, uri]))) + ';\n' +
+  "document.querySelectorAll('img[data-img]').forEach(function(i){" +
+  "var u=__IMG[i.getAttribute('data-img')]; if(u) i.src=u;});\n";
+
+const shotBytes = [...files.values()].reduce((a, b) => a + b.length, 0);
+console.log('картинок вынесено:', files.size, '—', Math.round(shotBytes / 1024) + ' KB');
+
+// В браузере renderVals() не вызывается: разметка уже собрана здесь. Но карта
+// IMG внутри неё тащила в бандл вторую полную копию всех скриншотов — вырезаем
+// сами base64-строки, оставляя объект синтаксически целым.
+const scriptRuntime = script.replace(/'data:image\/[a-zA-Z+]+;base64,[A-Za-z0-9+/=]*'/g, "''");
+const saved = script.length - scriptRuntime.length;
+console.log('из скрипта вырезано', Math.round(saved / 1024) + ' KB неиспользуемых base64');
+
 const boot = `
 var __PROPS = ${JSON.stringify(PROPS)};
 class DCLogic { constructor() { this.props = __PROPS; } }
-${script}
+${scriptRuntime}
 (function () {
   function boot() {
     try {
@@ -193,7 +267,7 @@ ${fontHead}
 ${noJsCss}
 </head>
 <body>
-<div id="dc-root">${markup}</div>
+<div id="dc-root">${markupFiles}</div>
 <script>${boot}</script>
 </body>
 </html>
@@ -204,11 +278,13 @@ const artifact = `<title>Alex — full-stack разработчик</title>
 ${fontHead}
 <style>${css}</style>
 ${noJsCss}
-<div id="dc-root">${markup}</div>
-<script>${boot}<\/script>
+<div id="dc-root">${markupInline}</div>
+<script>${inlineImgScript}${boot}<\/script>
 `;
 
-mkdirSync(DIST, { recursive: true });
+rmSync(DIST, { recursive: true, force: true });
+mkdirSync(join(DIST, 'img'), { recursive: true });
+for (const [name, buf] of files) writeFileSync(join(DIST, 'img', name), buf);
 writeFileSync(join(DIST, 'index.html'), page, 'utf8');
 writeFileSync(join(DIST, 'portfolio-site.html'), artifact, 'utf8');
 console.log('dist/index.html', Math.round(page.length / 1024) + ' KB');

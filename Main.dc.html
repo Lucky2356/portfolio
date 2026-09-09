@@ -55,13 +55,6 @@
     .nav::after { content: ''; position: absolute; left: 0; right: 0; top: 0; bottom: 0; z-index: -1;
       background: linear-gradient(180deg, rgba(6,9,13,0.97) 34%, rgba(6,9,13,0.72) 72%, rgba(6,9,13,0)); }
     .nav-left { display: flex; align-items: center; gap: 18px; }
-    .rail-menu { display: inline-flex; align-items: center; gap: 9px; padding: 8px 14px; border-radius: 8px;
-      background: rgba(159,228,255,0.08); border: 1px solid var(--border); color: var(--text); cursor: pointer;
-      font-family: var(--mono); font-size: 11px; letter-spacing: 0.16em;
-      transition: background 0.35s var(--ease), color 0.35s var(--ease), border-color 0.35s var(--ease); }
-    .rail-menu:hover, .rail-menu.on { background: var(--ice); color: var(--bg-deep); border-color: var(--ice); }
-    .rail-menu .glyph { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; width: 12px; height: 12px; }
-    .rail-menu .glyph i { background: currentColor; border-radius: 1px; }
     .nav-links button { position: relative; background: none; border: none; cursor: pointer; padding: 3px 0;
       font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.18em; color: var(--text-dim); transition: color 0.4s var(--ease); }
     .nav-links button::after { content: ''; position: absolute; left: 0; right: 0; bottom: -3px; height: 1px; background: var(--ice);
@@ -82,36 +75,9 @@
     .nav-mark { font-weight: 700; font-size: 14px; letter-spacing: 0.06em; color: var(--text); }
     .nav-mark span { color: var(--ice); }
     .nav-links { display: flex; align-items: center; gap: 34px; list-style: none; margin: 0; padding: 0; }
-    .nav-links a { position: relative; font-size: 11.5px; letter-spacing: 0.18em; color: var(--text-dim); padding: 3px 0; transition: color 0.4s var(--ease); }
-    .nav-links a::after { content: ''; position: absolute; left: 0; right: 0; bottom: -3px; height: 1px; background: var(--ice); transform: scaleX(0); transform-origin: right; transition: transform 0.55s var(--ease); }
-    .nav-links a:hover { color: var(--text); }
-    .nav-links a:hover::after { transform: scaleX(1); transform-origin: left; }
-    .nav-links a.active { color: var(--text); }
-    .nav-links a.active::before { content: '// '; color: var(--ice); opacity: 0.6; }
     .in-up { opacity: 0; transform: translateY(16px); }
     .revealed .in-up { animation: in-up 1.3s var(--ease) forwards; }
     @keyframes in-up { to { opacity: 1; transform: translateY(0); } }
-
-    .hero { position: relative; height: 100vh; min-height: 660px; z-index: 4; pointer-events: none; }
-    .hero > * { pointer-events: auto; }
-    .hero-title { position: absolute; left: 40px; right: 40px; top: 26%;
-      font-size: clamp(38px, 8.6vw, 128px); line-height: 0.94; font-weight: 700; color: var(--text);
-      text-shadow: 0 6px 70px rgba(5,7,10,0.95); pointer-events: none; will-change: transform; max-width: 12ch; }
-    .hero-title em { font-style: normal; color: var(--ice); }
-    .hero-title .w { display: inline-block; opacity: 0; filter: blur(16px); transform: translateY(0.32em); }
-    .revealed .hero-title .w { animation: word-in 1.7s var(--ease) forwards; }
-    @keyframes word-in { to { opacity: 1; filter: blur(0); transform: translateY(0); } }
-    .hero-meta { position: absolute; right: 40px; top: 30%; max-width: 30ch; text-align: right; }
-    .hero-meta .kicker { font-size: 11px; letter-spacing: 0.2em; color: var(--ice); margin-bottom: 14px; }
-    .scroll-cue { position: absolute; left: 40px; bottom: 40px; display: flex; align-items: center; gap: 14px; font-size: 11px; letter-spacing: 0.2em; color: var(--text-dim); }
-    .scroll-cue .track { width: 1px; height: 46px; background: var(--border); position: relative; overflow: hidden; }
-    .scroll-cue .track i { position: absolute; left: 0; right: 0; height: 16px; background: var(--ice); animation: run 2.4s var(--ease) infinite; }
-    @keyframes run { 0% { top: -18px; } 100% { top: 48px; } }
-    .hero-hud { position: absolute; right: 40px; bottom: 40px; text-align: right; font-size: 11px; letter-spacing: 0.16em; color: var(--text-dim); line-height: 2.1; }
-    .hero-hud b { color: var(--ice); font-weight: 400; }
-    .blink { animation: blink 1.7s steps(1) infinite; }
-    @keyframes blink { 0%, 62% { opacity: 1; } 63%, 100% { opacity: 0.12; } }
-
 
     .desktop { position: relative; height: 100vh; min-height: 660px; z-index: 4; overflow: hidden; }
     .dt-icons { position: absolute; top: 96px; height: 540px;
@@ -211,8 +177,6 @@
     .win-body .go:hover { color: var(--bg-deep); background: var(--ice); border-color: var(--ice); transform: translateY(-2px); }
     .win-body .go svg { transition: transform 0.45s var(--ease); }
     .win-body .go:hover svg { transform: translate(2px, -2px); }
-    .win-body .kv { display: flex; justify-content: space-between; gap: 16px; padding: 11px 0; border-bottom: 1px solid var(--border); font-size: 11.5px; letter-spacing: 0.06em; }
-    .win-body .kv span:last-child { color: var(--text-dim); }
     .win-body.term { display: flex; flex-direction: column; gap: 0; height: 320px; }
     .term-log { flex: 1; overflow-y: auto; font-size: 11.5px; line-height: 1.75; letter-spacing: 0.01em;
       color: var(--text-dim); padding-right: 6px; }
@@ -251,25 +215,15 @@
     .tb-tray .st { display: flex; align-items: center; gap: 7px; }
     .tb-tray .st i { width: 6px; height: 6px; border-radius: 50%; background: var(--ice); box-shadow: 0 0 8px var(--ice); }
 
-    .startmenu { position: absolute; left: 20px; bottom: 84px; z-index: 21; width: 268px; padding: 10px;
-      border: 1px solid var(--border); border-radius: 12px; background: rgba(8,12,17,0.94); backdrop-filter: blur(16px);
-      opacity: 0; visibility: hidden; transform: translateY(12px); transition: opacity 0.4s var(--ease), transform 0.4s var(--ease), visibility 0.4s; }
-    .startmenu.on { opacity: 1; visibility: visible; transform: translateY(0); }
-    .startmenu.top { top: 78px; bottom: auto; left: 40px; transform: translateY(-12px); }
-    .startmenu.top.on { transform: translateY(0); }
-    .startmenu .hd { font-size: 10px; letter-spacing: 0.2em; color: var(--text-dim); padding: 8px 12px 12px; }
-    .startmenu button { display: flex; align-items: center; gap: 12px; width: 100%; padding: 11px 12px; border-radius: 7px;
-      background: none; border: none; color: var(--text); cursor: pointer; font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.1em; text-align: left;
-      transition: background 0.3s var(--ease), color 0.3s var(--ease); }
-    .startmenu button:hover { background: rgba(159,228,255,0.10); color: var(--ice); }
-
-
     #pages { position: fixed; inset: 0; z-index: 25; pointer-events: none; }
     .page { position: absolute; inset: 0; overflow-y: auto; overflow-x: hidden; pointer-events: none;
       background: linear-gradient(180deg, #080b10, #05070a);
       opacity: 0; visibility: hidden; clip-path: inset(0 0 100% 0);
       transition: opacity 0.45s var(--ease), clip-path 0.8s var(--ease), visibility 0.8s; }
     .page.on { opacity: 1; visibility: visible; clip-path: inset(0 0 0 0); pointer-events: auto; }
+    /* Закрытая страница занимает весь экран, поэтому браузер считает её видимой
+       и продолжает её раскладывать и грузить её картинки. Пропускаем её целиком. */
+    .page:not(.on) { content-visibility: hidden; }
     .page::before { content: ''; position: absolute; inset: 0; pointer-events: none;
       background: radial-gradient(120% 70% at 78% 6%, rgba(159,228,255,0.07), transparent 62%),
                   radial-gradient(90% 60% at 8% 92%, rgba(176,124,255,0.07), transparent 60%); }
@@ -584,29 +538,12 @@
 
     .veil { background: rgba(7,10,14,0.93); backdrop-filter: blur(5px); }
     section { padding: 140px 0; }
-    .section-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; margin-bottom: 56px; }
-    .section-head h2 { font-size: clamp(30px, 5.2vw, 66px); line-height: 0.94; }
-    .section-head .num { font-size: 11px; color: var(--text-dim); letter-spacing: 0.18em; }
     .reveal { opacity: 0; transform: translateY(28px); filter: blur(9px);
       transition: opacity 1.2s var(--ease), transform 1.2s var(--ease), filter 1.2s var(--ease); transition-delay: var(--d, 0ms); }
     .reveal.is-visible { opacity: 1; transform: translateY(0); filter: blur(0); }
     .wipe { clip-path: inset(0 0 108% 0); transition: clip-path 1.3s var(--ease); transition-delay: var(--d, 0ms); }
     .is-visible .wipe, .wipe.is-visible { clip-path: inset(0 0 -12% 0); }
 
-    .blocks { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 18px; }
-    .block { position: relative; border-radius: 8px; border: 1px solid var(--border); background: rgba(12,17,23,0.72); overflow: hidden;
-      transition: border-color 0.7s var(--ease), transform 0.8s var(--ease); }
-    .block:hover { border-color: var(--ice); transform: translateY(-6px); }
-    .block canvas { width: 100%; height: 230px; display: block; }
-    .block .meta { padding: 20px 22px 24px; border-top: 1px solid var(--border); }
-    .block .tag { font-size: 11px; letter-spacing: 0.16em; color: var(--ice); }
-    .block h3 { font-size: 16px; margin-top: 10px; }
-    .block .stack { font-size: 11px; letter-spacing: 0.12em; color: var(--text-dim); margin-top: 10px; }
-    .block .idx { position: absolute; top: 14px; left: 16px; font-size: 11px; letter-spacing: 0.16em; color: var(--text-dim); z-index: 2; }
-    .block .arrow { position: absolute; top: 14px; right: 16px; z-index: 2; color: var(--text-dim); transition: transform 0.6s var(--ease), color 0.6s var(--ease); }
-    .block:hover .arrow { transform: translate(4px,-4px); color: var(--ice); }
-
-    .about-grid { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1.25fr); gap: 64px; align-items: start; }
     .skill-row { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 16px 0; border-bottom: 1px solid var(--border); font-size: 12.5px; letter-spacing: 0.02em; }
     .skill-row .lvl { display: flex; gap: 4px; }
     .skill-row .lvl i { width: 22px; height: 2px; background: var(--border); }
@@ -747,7 +684,7 @@
           </button>
         </div>
         <div class="win-body">
-          <div class="preview shotbox"><canvas data-thumb="1"></canvas><img class="ov" src="{{p.shot1}}" alt=""><span>{{p.idx}}</span></div>
+          <div class="preview shotbox"><canvas data-thumb="1"></canvas><img class="ov" src="{{p.shot1}}" alt="{{p.title}} — скриншот интерфейса"><span>{{p.idx}}</span></div>
           <div class="tag"><span class="slash">//</span> {{p.tag}}</div>
           <h3>{{p.title}}</h3>
           <div class="win-case">
@@ -800,7 +737,7 @@
           <button type="button" class="pg-card st" data-item="{{p.id}}" style="{{p.pd}}">
             <span class="idx">{{p.idx}}</span>
             <svg class="arw" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M7 7h10v10"/></svg>
-            <span class="shotbox"><canvas data-thumb="1"></canvas><img class="ov" src="{{p.shot1}}" alt=""></span>
+            <span class="shotbox"><canvas data-thumb="1"></canvas><img class="ov" src="{{p.shot1}}" alt="{{p.title}} — скриншот интерфейса"></span>
             <span class="tag">{{p.tag}}</span>
             <span class="ttl">{{p.title}}</span>
             <span class="stk">{{p.stack}}</span>
@@ -903,10 +840,10 @@
       </div>
       <div class="di-grid">
         <div class="di-media">
-          <div class="shotbox"><canvas data-shot="a"></canvas><img class="ov" src="{{p.shot1}}" alt=""></div>
+          <div class="shotbox"><canvas data-shot="a"></canvas><img class="ov" src="{{p.shot1}}" alt="{{p.title}} — скриншот 1"></div>
           <div class="di-shots">
-            <div class="shotbox"><canvas data-shot="b"></canvas><img class="ov" src="{{p.shot2}}" alt=""></div>
-            <div class="shotbox"><canvas data-shot="c"></canvas><img class="ov" src="{{p.shot3}}" alt=""></div>
+            <div class="shotbox"><canvas data-shot="b"></canvas><img class="ov" src="{{p.shot2}}" alt="{{p.title}} — скриншот 2"></div>
+            <div class="shotbox"><canvas data-shot="c"></canvas><img class="ov" src="{{p.shot3}}" alt="{{p.title}} — скриншот 3"></div>
           </div>
         </div>
         <div class="di-body">
@@ -1491,13 +1428,13 @@ function camAt(sp) {
 class Component extends DCLogic {
   componentDidMount() {
     this._openAvg = 0; this._lastOpen = -1; this._lastHud = 0; this._lastStage = '';
+    this._calm = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
     this.applyIce();
     this.buildAll();
     this.runLoader();
     this.initScene();
     this.initReveal();
     this.initTitle();
-    this.initBlocks();
     this.initDesktop();
   }
   componentDidUpdate(prev) {
@@ -1506,7 +1443,6 @@ class Component extends DCLogic {
   }
   componentWillUnmount() {
     if (this._raf) cancelAnimationFrame(this._raf);
-    if (this._blockRaf) cancelAnimationFrame(this._blockRaf);
     if (this._observer) this._observer.disconnect();
     if (this._onResize) window.removeEventListener('resize', this._onResize);
     if (this._onScroll) window.removeEventListener('scroll', this._onScroll);
@@ -1656,69 +1592,33 @@ class Component extends DCLogic {
       });
     }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
     root.querySelectorAll('.reveal').forEach(function (el) { self._observer.observe(el); });
-    var kick = root.querySelector('.hero-meta [data-scramble]');
-    if (kick) setTimeout(function () { self.scramble(kick); }, 3200);
   }
-
-  initBlocks() {
-    var root = this.root();
-    if (!root) return;
-    var self = this;
-    var list = Array.prototype.slice.call(root.querySelectorAll('[data-block]')).map(function (cv, idx) {
-      var seed = 400 + Number(cv.getAttribute('data-block') || idx) * 811;
-      return {
-        cv: cv, ctx: cv.getContext('2d'),
-        core: buildCrystal(0, seed, 0.16 + (idx % 3) * 0.05, 0.66 + (idx % 4) * 0.09),
-        spin: idx * 1.3, hov: 0, W: 0, H: 0
-      };
-    });
-    if (!list.length) return;
-    list.forEach(function (S) {
-      var card = S.cv.closest('.block');
-      if (!card) return;
-      card.addEventListener('mouseenter', function () { S.hovT = 1; });
-      card.addEventListener('mouseleave', function () { S.hovT = 0; });
-    });
-    var dpr = Math.min(window.devicePixelRatio || 1, 2);
-    function tick(now) {
-      var ice = hexRgb(self.props.ice || '#9fe4ff');
-      var t = now / 1000;
-      list.forEach(function (S) {
-        var r = S.cv.getBoundingClientRect();
-        if (!r.width || !r.height) return;
-        if (S.W !== r.width || S.H !== r.height) {
-          S.W = r.width; S.H = r.height;
-          S.cv.width = r.width * dpr; S.cv.height = r.height * dpr;
-          S.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-        }
-        S.hov += ((S.hovT || 0) - S.hov) * 0.07;
-        S.spin += 0.0026 + S.hov * 0.004;
-        var ctx = S.ctx, W = S.W, H = S.H;
-        ctx.clearRect(0, 0, W, H);
-        var cx = W/2, cy = H/2, R = Math.min(W,H) * 0.30;
-        var g0 = ctx.createRadialGradient(cx, cy, 0, cx, cy, R*2.4);
-        g0.addColorStop(0, 'rgba(' + ice.join(',') + ',' + (0.07 + S.hov*0.09).toFixed(3) + ')');
-        g0.addColorStop(1, 'rgba(' + ice.join(',') + ',0)');
-        ctx.fillStyle = g0; ctx.fillRect(0, 0, W, H);
-        drawBlockShell(ctx, cx, cy, R, S.spin, 0.30, ice, 0.30 + S.hov * 0.34);
-        drawShell(ctx, S.core, cx, cy, R * 0.56, S.spin * 1.5, 0.30, ice, S.hov * 0.5, 0, 0, -9999, -9999, 0, 1, t);
-      });
-      self._blockRaf = requestAnimationFrame(tick);
-    }
-    this._blockRaf = requestAnimationFrame(tick);
-  }
-
 
   initDesktop() {
     var root = this.root();
     if (!root) return;
     var self = this;
     this._dtCleanup = [];
+
+    // Один общий набор слушателей на всё перетаскивание. Раньше каждое из
+    // десяти окон и каждая из десяти иконок вешали собственные mousemove и
+    // mouseup на window — два десятка обработчиков, работавших постоянно.
+    var dragActive = null;
+    var onDragMove = function (e) { if (dragActive) dragActive.move(e); };
+    var onDragUp = function (e) {
+      if (!dragActive) return;
+      var d = dragActive; dragActive = null;
+      if (d.up) d.up(e);
+    };
+    window.addEventListener('mousemove', onDragMove);
+    window.addEventListener('mouseup', onDragUp);
+    this._dtCleanup.push(function () {
+      window.removeEventListener('mousemove', onDragMove);
+      window.removeEventListener('mouseup', onDragUp);
+    });
+
     var winLayer = document.getElementById('dt-windows');
     var tbOpen = document.getElementById('tb-open');
-    var startBtn = document.getElementById('tb-start');
-    var topBtn = document.getElementById('top-start');
-    var startMenu = document.getElementById('startmenu');
     var frostEl = document.getElementById('frost');
     var openMap = {};
     var minimized = {};
@@ -1856,9 +1756,6 @@ class Component extends DCLogic {
           window.scrollTo({ top: 0, behavior: 'smooth' });
           setTimeout(function () { openWin(wid); }, 560);
         } else { openWin(wid); }
-        if (startMenu) startMenu.classList.remove('on');
-        if (startBtn) startBtn.classList.remove('on');
-        if (topBtn) topBtn.classList.remove('on');
       };
       el.addEventListener('click', h);
       self._dtCleanup.push(function () { el.removeEventListener('click', h); });
@@ -1884,61 +1781,24 @@ class Component extends DCLogic {
 
       var bar = w.querySelector('.win-bar');
       if (!bar) return;
-      var dx = 0, dy = 0, dragging = false;
+      var dx = 0, dy = 0;
       var down = function (e) {
         if (e.target.closest('.win-x')) return;
-        dragging = true;
         dx = e.clientX - w.offsetLeft;
         dy = e.clientY - w.offsetTop;
+        dragActive = { move: move };
         e.preventDefault();
       };
       var move = function (e) {
-        if (!dragging) return;
         var host = winLayer ? winLayer.getBoundingClientRect() : null;
         var maxX = host ? host.width - 120 : 2000;
         var maxY = host ? host.height - 120 : 2000;
         w.style.left = Math.max(-40, Math.min(maxX, e.clientX - dx)) + 'px';
         w.style.top = Math.max(0, Math.min(maxY, e.clientY - dy)) + 'px';
       };
-      var up = function () { dragging = false; };
       bar.addEventListener('mousedown', down);
-      window.addEventListener('mousemove', move);
-      window.addEventListener('mouseup', up);
-      self._dtCleanup.push(function () {
-        bar.removeEventListener('mousedown', down);
-        window.removeEventListener('mousemove', move);
-        window.removeEventListener('mouseup', up);
-      });
+      self._dtCleanup.push(function () { bar.removeEventListener('mousedown', down); });
     });
-
-    if (startMenu) {
-      var mBtns = [];
-      if (startBtn) mBtns.push({ b: startBtn, top: false });
-      if (topBtn) mBtns.push({ b: topBtn, top: true });
-      var closeMenu = function () {
-        startMenu.classList.remove('on');
-        mBtns.forEach(function (o) { o.b.classList.remove('on'); });
-      };
-      mBtns.forEach(function (o) {
-        var ts = function (e) {
-          e.stopPropagation();
-          var wasOn = startMenu.classList.contains('on') && o.b.classList.contains('on');
-          closeMenu();
-          if (!wasOn) {
-            startMenu.classList.toggle('top', o.top);
-            startMenu.classList.add('on');
-            o.b.classList.add('on');
-          }
-        };
-        o.b.addEventListener('click', ts);
-        self._dtCleanup.push(function () { o.b.removeEventListener('click', ts); });
-      });
-      document.addEventListener('click', closeMenu);
-      self._dtCleanup.push(function () { document.removeEventListener('click', closeMenu); });
-      var sm = function (e) { e.stopPropagation(); };
-      startMenu.addEventListener('click', sm);
-      self._dtCleanup.push(function () { startMenu.removeEventListener('click', sm); });
-    }
 
     if (caBtn) {
       var hca = function (e) {
@@ -1951,8 +1811,6 @@ class Component extends DCLogic {
 
     root.querySelectorAll('[data-scroll]').forEach(function (el) {
       var h = function () {
-        if (startMenu) startMenu.classList.remove('on');
-        if (startBtn) startBtn.classList.remove('on');
         window.scrollTo({ top: window.innerHeight, behavior: 'smooth' });
       };
       el.addEventListener('click', h);
@@ -2264,6 +2122,8 @@ class Component extends DCLogic {
       pageCur.classList.remove('on');
       pageCur = null;
       document.documentElement.dataset.pageOpen = '';
+      magPump();
+      if (self._wakeScene) self._wakeScene();
       railBtns.forEach(function (b) { b.classList.remove('active'); });
     }
     function openPage(id) {
@@ -2308,17 +2168,17 @@ class Component extends DCLogic {
 
 
     icons.forEach(function (I) {
-      var el = I.el, sx = 0, sy = 0, ox = 0, oy = 0, moved = false, active = false;
+      var el = I.el, sx = 0, sy = 0, ox = 0, oy = 0, moved = false;
       var down = function (e) {
         if (e.button !== 0) return;
-        active = true; moved = false;
+        moved = false;
         sx = e.clientX; sy = e.clientY;
         ox = parseFloat(el.style.left) || 0;
         oy = parseFloat(el.style.top) || 0;
+        dragActive = { move: move, up: up };
         e.preventDefault();
       };
       var move = function (e) {
-        if (!active) return;
         var dx = e.clientX - sx, dy = e.clientY - sy;
         if (!moved && Math.abs(dx) + Math.abs(dy) < 5) return;
         if (!moved) { moved = true; el.classList.add('dragging'); hidePrev(); }
@@ -2350,8 +2210,6 @@ class Component extends DCLogic {
         I.cx = 0;
       };
       var up = function () {
-        if (!active) return;
-        active = false;
         measured = 0;
         if (moved) {
           el.classList.remove('dragging');
@@ -2360,13 +2218,7 @@ class Component extends DCLogic {
         }
       };
       el.addEventListener('mousedown', down);
-      window.addEventListener('mousemove', move);
-      window.addEventListener('mouseup', up);
-      self._dtCleanup.push(function () {
-        el.removeEventListener('mousedown', down);
-        window.removeEventListener('mousemove', move);
-        window.removeEventListener('mouseup', up);
-      });
+      self._dtCleanup.push(function () { el.removeEventListener('mousedown', down); });
     });
 
     var deskHost = document.getElementById('desktop');
@@ -2458,7 +2310,22 @@ class Component extends DCLogic {
     });
 
     var magRaf = null;
+    // Лупа нужна только когда стол реально на экране: раньше цикл продолжал
+    // мерить getBoundingClientRect и писать инлайновые стили даже поверх
+    // открытой страницы-оверлея.
+    function magActive() {
+      return !self._calm && !document.hidden &&
+        document.documentElement.dataset.pageOpen !== '1' &&
+        self._deskOnScreen !== false;
+    }
+    function magPump() {
+      if (magRaf || !magActive()) return;
+      magRaf = requestAnimationFrame(magLoop);
+    }
+    self._wakeMag = magPump;
     function magLoop(now) {
+      magRaf = null;
+      if (!magActive()) return;
       if (now - measured > 500) {
         measured = now;
         icons.forEach(function (I) {
@@ -2547,10 +2414,19 @@ class Component extends DCLogic {
         borderAng = (borderAng + 0.34) % 360;
         panel.style.setProperty('--ang', borderAng.toFixed(1) + 'deg');
       }
-      magRaf = requestAnimationFrame(magLoop);
+      magPump();
     }
-    magRaf = requestAnimationFrame(magLoop);
-    this._dtCleanup.push(function () { if (magRaf) cancelAnimationFrame(magRaf); });
+    magPump();
+    var onDeskVis = function (e) { self._deskOnScreen = e[0].isIntersecting; magPump(); };
+    var deskObs = deskHost ? new IntersectionObserver(onDeskVis, { threshold: 0 }) : null;
+    if (deskObs && deskHost) deskObs.observe(deskHost);
+    var onVis = function () { magPump(); if (self._wakeScene) self._wakeScene(); };
+    document.addEventListener('visibilitychange', onVis);
+    this._dtCleanup.push(function () {
+      if (magRaf) cancelAnimationFrame(magRaf);
+      if (deskObs) deskObs.disconnect();
+      document.removeEventListener('visibilitychange', onVis);
+    });
 
 
     var panel = document.getElementById('dt-widget');
@@ -2636,6 +2512,8 @@ class Component extends DCLogic {
       [bgc, canvas].forEach(function (c) { c.width = W * dpr; c.height = H * dpr; });
       bctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      motionUntil = performance.now() + 600;
+      pump();
     };
     this._onResize = resize; resize();
     window.addEventListener('resize', resize);
@@ -2646,6 +2524,8 @@ class Component extends DCLogic {
       spRaw = max > 0 ? cl(window.scrollY / max) : 0;
       velRaw = Math.min(1, Math.abs(window.scrollY - lastScroll) / 110);
       lastScroll = window.scrollY;
+      motionUntil = performance.now() + 600;
+      pump();
     };
     this._onScroll = onScroll;
     window.addEventListener('scroll', onScroll, { passive: true });
@@ -2653,6 +2533,8 @@ class Component extends DCLogic {
 
     var mx=0, my=0, tmx=0, tmy=0, px=-9999, py=-9999;
     this._onMove = function (e) {
+      motionUntil = performance.now() + 600;
+      pump();
       px = e.clientX; py = e.clientY;
       tmx = px / Math.max(1, window.innerWidth) - 0.5;
       tmy = py / Math.max(1, window.innerHeight) - 0.5;
@@ -2666,9 +2548,18 @@ class Component extends DCLogic {
 
     var t0 = performance.now(), lastT = t0, aberSmooth = 0, velSmooth = 0, idle = 0;
     var slowFrames = 0, perfChecked = 0;
-    var calmMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var calmMotion = self._calm;
+    var motionUntil = 0;
+
+    function pump() {
+      if (self._raf || document.hidden) return;
+      self._raf = requestAnimationFrame(draw);
+    }
+    self._wakeScene = function () { motionUntil = performance.now() + 600; pump(); };
 
     function draw(now) {
+      self._raf = null;
+      if (document.hidden) return;
       var dt = Math.min(48, now - lastT) / 16.67;
       lastT = now;
       var time = (now - t0) / 1000;
@@ -2689,10 +2580,7 @@ class Component extends DCLogic {
       my += (tmy - my) * Math.min(1, 0.042 * dt);
       idle += 0.0017 * dt;
 
-      if (document.documentElement.dataset.pageOpen === '1') {
-        self._raf = requestAnimationFrame(draw);
-        return;
-      }
+      if (document.documentElement.dataset.pageOpen === '1') return;
       var ice = hexRgb(self.props.ice || '#9fe4ff');
       var iceStr = ice.join(',');
       var atmosphere = self.props.atmosphere !== false;
@@ -2777,9 +2665,11 @@ class Component extends DCLogic {
         var stage = swarmA > 0.35 ? (shapeName || 'ЧАСТИЦЫ') : diss > 0.15 ? 'РАСПАД' : 'ЦЕЛАЯ';
         if (hudStage && stage !== self._lastStage) { hudStage.textContent = stage; self._lastStage = stage; }
       }
-      self._raf = requestAnimationFrame(draw);
+      // При prefers-reduced-motion не крутим кадры постоянно: рисуем, пока
+      // пользователь скроллит или тянет мышь, и останавливаемся, когда он замер.
+      if (!calmMotion || now < motionUntil) pump();
     }
-    this._raf = requestAnimationFrame(draw);
+    pump();
   }
 
   renderVals() {
@@ -3011,32 +2901,6 @@ function drawThumb(canvas, seed, ice) {
   vg.addColorStop(0, 'rgba(5,7,10,0)'); vg.addColorStop(1, 'rgba(5,7,10,0.55)');
   ctx.fillStyle = vg; ctx.fillRect(0, h - 40, w, 40);
 }
-function drawBlockShell(ctx, cx, cy, R, yaw, tilt, ice, alpha) {
-  var V = [[-1,-1,-1],[1,-1,-1],[1,1,-1],[-1,1,-1],[-1,-1,1],[1,-1,1],[1,1,1],[-1,1,1]];
-  var F = [[0,1,2,3],[5,4,7,6],[4,0,3,7],[1,5,6,2],[4,5,1,0],[3,2,6,7]];
-  var cyw=Math.cos(yaw), syw=Math.sin(yaw), ctl=Math.cos(tilt), stl=Math.sin(tilt), persp=3.6;
-  var w = V.map(function (p) {
-    var x=p[0]*cyw+p[2]*syw, z=-p[0]*syw+p[2]*cyw;
-    return [x, p[1]*ctl - z*stl, p[1]*stl + z*ctl];
-  });
-  var tris = F.map(function (q) {
-    var pts = q.map(function (i) { var s = persp/(persp - w[i][2]); return { x: cx + w[i][0]*R*s, y: cy + w[i][1]*R*s }; });
-    var zz = (w[q[0]][2]+w[q[1]][2]+w[q[2]][2]+w[q[3]][2])/4;
-    return { pts: pts, z: zz };
-  });
-  tris.sort(function (a,b) { return a.z - b.z; });
-  tris.forEach(function (T) {
-    ctx.beginPath();
-    ctx.moveTo(T.pts[0].x, T.pts[0].y);
-    for (var i = 1; i < 4; i++) ctx.lineTo(T.pts[i].x, T.pts[i].y);
-    ctx.closePath();
-    ctx.fillStyle = 'rgba(' + ice.join(',') + ',' + (0.020 * alpha).toFixed(3) + ')';
-    ctx.fill();
-    ctx.strokeStyle = 'rgba(' + ice.join(',') + ',' + (alpha * 0.42).toFixed(3) + ')';
-    ctx.lineWidth = 0.8; ctx.stroke();
-  });
-}
-
 function drawSwarm(ctx, swarm, cx, cy, R, yaw, tilt, ice, alphaMul, time, px, py, dt) {
   var n = swarm.length;
   var per = 4.6;
