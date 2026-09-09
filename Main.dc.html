@@ -36,7 +36,7 @@
     .slash { color: var(--ice); opacity: 0.5; letter-spacing: 0.14em; }
 
     #loader { position: fixed; inset: 0; z-index: 90; background: var(--bg-deep); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px;
-      transition: opacity 1.1s var(--ease), visibility 1.1s; }
+      transition: opacity 0.45s var(--ease), visibility 0.45s; }
     #loader.done { opacity: 0; visibility: hidden; }
     #loader .mark { font-size: 12px; letter-spacing: 0.4em; color: var(--text-dim); }
     #loader .bar { font-size: 14px; letter-spacing: 0.28em; color: var(--ice); white-space: pre; }
@@ -114,14 +114,17 @@
 
 
     .desktop { position: relative; height: 100vh; min-height: 660px; z-index: 4; overflow: hidden; }
-    .dt-icons { position: absolute; top: 96px; height: 540px; }
+    .dt-icons { position: absolute; top: 96px; height: 540px;
+      display: grid; grid-template-columns: repeat(auto-fill, 96px); grid-auto-rows: 98px; gap: 10px 4px; }
+    .dt-icons.placed { display: block; }
     .dt-icons.left { left: 28px; }
     .dt-icons.right { right: 28px; }
-    .dt-icon { position: absolute; width: 96px; height: 98px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 8px;
+    .dt-icon { position: relative; width: 96px; height: 98px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 8px;
       padding: 10px 6px 6px; background: none; border: 1px solid transparent; border-radius: 6px; cursor: pointer;
       font-family: var(--mono); color: var(--text); opacity: 0;
       transform: translate(var(--fx,0px), var(--fy,0px)) scale(0.7) rotate(var(--fr,0deg));
       transition: transform 1.25s var(--ease) var(--dl,0s), opacity 0.8s ease var(--dl,0s), background 0.35s var(--ease), border-color 0.35s var(--ease); }
+    .dt-icons.placed .dt-icon { position: absolute; }
     .landed .dt-icon { opacity: 1; transform: translate(0px,0px) scale(1) rotate(0deg); }
     .dt-icon:hover { border-color: var(--border); }
     .dt-icon:focus-visible { outline: none; background: rgba(159,228,255,0.14); border-color: var(--ice); }
@@ -713,7 +716,7 @@
     <h1 id="hero-title">ПРИВЕТ, Я <em>ALEX</em></h1>
     <p>Full-stack разработчик. Открывайте файлы на столе — внутри каждый проект.</p>
     <div class="rows">
-      <div>ФАЙЛОВ<b id="dt-count">0</b></div>
+      <div>ФАЙЛОВ<b id="dt-count">9</b></div>
       <div>ОТКРЫТО<b id="dt-open">0</b></div>
       <div>СТАТУС<b>ДОСТУПЕН <span class="blink">_</span></b></div>
       <div style="display:none"><b id="hud-open">0</b><b id="hud-stage"></b><b id="hud-total">0</b></div>
@@ -965,7 +968,7 @@
     <span class="num" style="font-size:10px;letter-spacing:0.18em;color:var(--text-dim)">01 <span class="slash">//</span> <span data-scramble>CONTACT</span></span>
     <h2 class="wipe">ДАВАЙТЕ СОБЕРЁМ ВАШ ПРОЕКТ</h2>
     <div class="mail"><a data-url="{{links.email}}" target="_blank" rel="noopener noreferrer">hello@example.com</a></div>
-    <div style="margin-top:38px"><a data-url="{{links.email}}" class="pill" target="_blank" rel="noopener noreferrer">НАПИСАТЬ МНЕ</button></div>
+    <div style="margin-top:38px"><a data-url="{{links.email}}" class="pill" target="_blank" rel="noopener noreferrer">НАПИСАТЬ МНЕ</a></div>
   </div>
 </section>
 
@@ -1510,6 +1513,7 @@ class Component extends DCLogic {
     if (this._onMove) window.removeEventListener('mousemove', this._onMove);
     if (this._onLeave) window.removeEventListener('mouseout', this._onLeave);
     if (this._clockTimer) clearInterval(this._clockTimer);
+    if (this._loaderGuard) clearTimeout(this._loaderGuard);
     (this._dtCleanup || []).forEach(function (fn) { fn(); });
   }
   root() { return document.getElementById('dc-root'); }
@@ -1529,12 +1533,21 @@ class Component extends DCLogic {
   }
 
   runLoader() {
+    var self = this;
     var loader = document.getElementById('loader');
     var bar = document.getElementById('load-bar');
     var pct = document.getElementById('load-pct');
     var root = this.root();
-    if (!loader || !bar || !pct) { if (root) root.classList.add('revealed'); return; }
-    var N = 18, t0 = performance.now(), dur = 2100;
+    var reveal = function () {
+      if (root) { root.classList.add('revealed'); root.classList.add('landed'); }
+      if (loader) loader.classList.add('done');
+    };
+    // Страховка: что бы ни случилось со сценой, шрифтами или rAF, через 2,5 с
+    // лоадер уходит и контент показывается. Без неё любая ошибка оставляет
+    // посетителя на чёрном экране «00%».
+    this._loaderGuard = setTimeout(reveal, 2500);
+    if (!loader || !bar || !pct) { reveal(); return; }
+    var N = 18, t0 = performance.now(), dur = 850;
     var tick = function (now) {
       var k = cl((now - t0) / dur);
       var e = smoother(k);
@@ -1549,8 +1562,8 @@ class Component extends DCLogic {
       pct.textContent = (e * 100 < 10 ? '0' : '') + Math.round(e * 100) + '%';
       if (k < 1) { requestAnimationFrame(tick); }
       else {
-        loader.classList.add('done');
-        if (root) { root.classList.add('revealed'); root.classList.add('landed'); }
+        clearTimeout(self._loaderGuard);
+        reveal();
         var frost = document.getElementById('frost');
         if (frost) {
           frost.dataset.free = '0';
@@ -1958,6 +1971,7 @@ class Component extends DCLogic {
         el.style.top = ((i % ROWS) * CELL_H) + 'px';
       });
       g.style.width = (Math.max(1, Math.ceil(kids.length / ROWS)) * CELL_W) + 'px';
+      g.classList.add('placed');
     });
 
     var icons = Array.prototype.slice.call(root.querySelectorAll('.dt-icon')).map(function (el) {
@@ -2238,8 +2252,8 @@ class Component extends DCLogic {
     function paintThumbs(host) {
       host.querySelectorAll('canvas[data-thumb]').forEach(function (c) {
         if (c.dataset.drawn) return;
-        var owner = c.closest('[data-open]');
-        var pid = owner ? owner.getAttribute('data-open') : 'x';
+        var owner = c.closest('[data-open],[data-item]');
+        var pid = owner ? (owner.getAttribute('data-open') || owner.getAttribute('data-item')) : 'x';
         c.dataset.drawn = '1';
         drawThumb(c, seedOf(pid), hexRgb(self.props.ice || '#9fe4ff'));
       });
