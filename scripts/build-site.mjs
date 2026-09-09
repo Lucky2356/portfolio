@@ -27,6 +27,32 @@ const fontHead = `<link rel="preconnect" href="https://fonts.googleapis.com">
 
 // Без JS вся разметка уже на месте, но её прячет #loader и стартовые
 // состояния анимаций. Возвращаем всё это в видимое состояние.
+const SITE = 'https://lucky2356.github.io/portfolio/';
+const TITLE = 'Alex — full-stack разработчик';
+const DESC = 'Портфолио full-stack разработчика: девять проектов на TypeScript, Kotlin, Dart, Rust, Go и Python.';
+// Иконка вкладки и превью для мессенджеров: без них ссылка приходит
+// безымянным серым прямоугольником.
+const favicon = '<link rel="icon" href="data:image/svg+xml,' + encodeURIComponent(
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">' +
+  '<rect width="32" height="32" rx="7" fill="#05070a"/>' +
+  '<path d="M6 8h20v14H6z" fill="none" stroke="#9fe4ff" stroke-width="2"/>' +
+  '<path d="M6 12h20M13 22v3h6v-3M10 25h12" fill="none" stroke="#9fe4ff" stroke-width="2"/>' +
+  '</svg>') + '">';
+const meta = `<link rel="canonical" href="${SITE}">
+${favicon}
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="ALEX.DEV">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="${SITE}">
+<meta property="og:title" content="${TITLE}">
+<meta property="og:description" content="${DESC}">
+<meta property="og:image" content="${SITE}img/financeapps-2.jpg">
+<meta property="og:image:alt" content="Экран финансового помощника — одного из проектов в портфолио">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="${TITLE}">
+<meta name="twitter:description" content="${DESC}">
+<meta name="twitter:image" content="${SITE}img/financeapps-2.jpg">`;
+
 const noJsCss = `<noscript><style>
 #loader { display: none !important; }
 .dt-icon, .in-up, .reveal, .st, .taskbar,
@@ -174,14 +200,29 @@ console.log('вложенность тегов в порядке');
 // wireLinks() в рантайме делает то же самое, но проставить href на этапе
 // сборки дешевле и, главное, ссылки работают без JS.
 let wired = 0;
+let hiddenLinks = 0;
 markup = markup.replace(/<a\s([^>]*?)data-url="([^"]*)"([^>]*?)>/g,
   (whole, before, url, after) => {
+    // Незаполненный контакт не должен превращаться в мёртвую кнопку.
+    if (!url) { hiddenLinks++; return `<a ${before}data-url=""${after} hidden>`; }
     if (!/^(https?:|mailto:)/i.test(url)) return whole;
     if (/\bhref=/.test(before + after)) return whole;
     wired++;
     return `<a ${before}data-url="${url}" href="${url}"${after}>`;
   });
-console.log('href проставлен у', wired, 'ссылок');
+console.log('href проставлен у', wired, 'ссылок, скрыто незаполненных:', hiddenLinks);
+
+// --- что осталось заполнить --------------------------------------
+{
+  const todo = Object.entries(data.links)
+    .filter(([k, v]) => !v && k !== 'emailText')
+    .map(([k]) => k);
+  if (!data.links.owner || data.links.owner === 'ALEX') todo.push('surname');
+  if (todo.length) {
+    console.log('\n  ЗАПОЛНИТЬ в CONTACTS (Main.dc.html): ' + todo.join(', '));
+    console.log('  Пока пусто — соответствующие ссылки на странице скрыты.\n');
+  }
+}
 
 // --- картинки: из base64 в отдельные файлы -----------------------
 // Каждый из 15 скриншотов встречался в разметке 2-4 раза (окно, карточка
@@ -290,9 +331,10 @@ const page = `<!doctype html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Alex — full-stack разработчик</title>
-<meta name="description" content="Портфолио full-stack разработчика: девять проектов на TypeScript, Kotlin, Dart, Rust, Go и Python.">
+<title>${TITLE}</title>
+<meta name="description" content="${DESC}">
 <meta name="color-scheme" content="dark">
+${meta}
 ${fontHead}
 <style>${css}</style>
 ${noJsCss}
@@ -305,7 +347,7 @@ ${noJsCss}
 `;
 
 // вариант для публикации артефактом: без doctype/html/head/body
-const artifact = `<title>Alex — full-stack разработчик</title>
+const artifact = `<title>${TITLE}</title>
 ${fontHead}
 <style>${css}</style>
 ${noJsCss}
