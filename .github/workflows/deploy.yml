@@ -8,10 +8,11 @@ on:
   pull_request:
   workflow_dispatch:
 
+# Наименьшие права по умолчанию. Сборка идёт и на pull_request, ставит
+# зависимости и выполняет тесты — такой job не должен держать права на запись
+# в Pages и на выпуск OIDC-токена. Они нужны только выкладке и выданы ей ниже.
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
   group: pages-${{ github.ref }}
@@ -48,6 +49,10 @@ jobs:
     needs: build
     if: ${{ github.event_name == 'push' && vars.DEPLOY_PAGES == 'true' }}
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
