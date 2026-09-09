@@ -47,7 +47,7 @@
     #bg { position: fixed; inset: 0; width: 100%; height: 100%; display: block; z-index: 0; pointer-events: none; }
     #scene { position: fixed; inset: 0; width: 100%; height: 100%; display: block; z-index: 1; pointer-events: none; }
     .vignette { position: fixed; inset: 0; z-index: 2; pointer-events: none;
-      background: radial-gradient(130% 100% at 50% 50%, rgba(5,7,10,0) 34%, rgba(5,7,10,0.82) 100%); }
+      background: radial-gradient(140% 108% at 50% 50%, rgba(5,7,10,0) 48%, rgba(5,7,10,0.72) 100%); }
     .grain { position: fixed; inset: 0; z-index: 47; pointer-events: none; opacity: 0.085; mix-blend-mode: overlay;
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E"); }
     #frost { position: fixed; inset: 0; z-index: 46; pointer-events: none; opacity: 0;
@@ -374,8 +374,11 @@
     .di-tech { margin-top: 10px; font-size: 12px; line-height: 1.9; letter-spacing: 0.01em; color: var(--text); }
     .di-tech span:empty { display: none; }
     .di-tech span + span::before { content: ' · '; color: var(--ice); opacity: 0.55; }
-    .win-tech { margin-top: 14px; font-size: 11.5px; color: var(--text-dim); }
-    .win-tech span { color: var(--text); }
+    .win-stack { margin-top: 9px; font-size: 11.5px; letter-spacing: 0.06em; color: var(--text-dim); }
+    .win-metric { margin-top: 13px; padding-top: 12px; border-top: 1px solid var(--border);
+      font-family: var(--sans); font-size: 12.5px; color: var(--text-dim); }
+    .win-metric b { font-family: var(--mono); color: var(--ice); font-weight: 700;
+      letter-spacing: -0.03em; font-size: 15px; margin-right: 7px; }
 
     .di-case { margin-top: 18px; }
     .dc-row { display: grid; grid-template-columns: 92px minmax(0,1fr); gap: 16px; align-items: start;
@@ -390,9 +393,6 @@
       font-family: var(--sans); font-size: 12px; color: var(--text-dim); }
     .pg-card .mtr b { font-family: var(--mono); color: var(--ice); font-weight: 700; letter-spacing: -0.03em;
       font-size: 14px; margin-right: 6px; }
-    .win-case { margin-top: 14px; }
-    .win-case .dc-row { grid-template-columns: 80px minmax(0,1fr); gap: 12px; padding: 10px 0; }
-    .win-case .dc-row p { font-size: 12.5px; line-height: 1.55; }
     @media (max-width: 640px) { .dc-row { grid-template-columns: 1fr; gap: 6px; } }
     .di-sub { margin-top: 22px; font-size: 11px; letter-spacing: 0.2em; color: var(--text-dim); }
     .di-src { margin-top: 20px; font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.02em; color: var(--text-dim); }
@@ -558,7 +558,7 @@
     .tb-tray .clock .cl { animation: blink 1.05s steps(1) infinite; }
 
     .layer { position: relative; z-index: 4; }
-    .manifesto { padding: 17vh 0 26vh; background: linear-gradient(180deg, rgba(7,10,14,0) 0%, #070a0e 12%, #070a0e 82%, rgba(7,10,14,0) 100%); }
+    .manifesto { padding: 9vh 0 10vh; background: linear-gradient(180deg, rgba(7,10,14,0) 0%, #070a0e 12%, #070a0e 82%, rgba(7,10,14,0) 100%); }
     .manifesto h2 { font-family: var(--sans); font-weight: 500; font-size: clamp(24px, 3.6vw, 46px); line-height: 1.32; letter-spacing: -0.02em; max-width: 26ch; text-shadow: 0 2px 34px rgba(5,7,10,0.95); }
     .manifesto .lead { color: var(--text-dim); }
     .manifesto .lead b { color: var(--text); font-weight: 400; }
@@ -579,11 +579,11 @@
     .skill-row .lvl i { width: 22px; height: 2px; background: var(--border); }
     .skill-row .lvl i.on { background: var(--ice); }
 
-    .stage { position: relative; height: 126vh; }
+    .stage { position: relative; height: 104vh; }
     .stage-cap { position: absolute; left: 40px; top: 34%; font-size: 11px; letter-spacing: 0.22em; color: var(--text-dim); }
     @media (max-width: 900px) { .stage { height: 70vh; } .stage-cap { left: 20px; } }
 
-    .contact { padding: 110px 0 90px; text-align: center; min-height: 86vh;
+    .contact { padding: 72px 0 64px; text-align: center; min-height: 62vh;
       display: flex; align-items: center; justify-content: center; }
     .contact .wrap { width: 100%; }
     .contact h2 { font-size: clamp(32px, 6.4vw, 88px); line-height: 0.94; max-width: 16ch; margin: 18px auto 40px; text-shadow: 0 4px 50px rgba(5,7,10,0.95); }
@@ -614,7 +614,7 @@
       .nav-links a { font-size: 11px; letter-spacing: 0.1em; }
       .blocks { grid-template-columns: 1fr; }
       .about-grid { grid-template-columns: 1fr; gap: 34px; }
-      .manifesto { padding: 130px 0 110px; }
+      .manifesto { padding: 80px 0 70px; }
       .contact { padding: 90px 0 70px; min-height: 0; display: block; }
     }
     @media (prefers-reduced-motion: reduce) {
@@ -708,14 +708,8 @@
           <div class="preview shotbox"><canvas data-thumb="1"></canvas><img class="ov" src="{{p.shot1}}" alt="{{p.title}} — скриншот интерфейса"><span>{{p.idx}}</span></div>
           <div class="tag"><span class="slash">//</span> {{p.tag}}</div>
           <h3>{{p.title}}</h3>
-          <div class="win-case">
-            <div class="dc-row"><span>ЗАДАЧА</span><p>{{p.task}}</p></div>
-            <div class="dc-row"><span>РЕШЕНИЕ</span><p>{{p.solution}}</p></div>
-            <div class="dc-row"><span>РЕЗУЛЬТАТ</span><p>{{p.result}}</p></div>
-          </div>
-          <div class="di-tech win-tech">
-            <sc-for list="{{p.chips}}" as="c" hint-placeholder-count="3"><span>{{c.label}}</span></sc-for>
-          </div>
+          <div class="win-stack">{{p.stack}}</div>
+          <div class="win-metric"><b>{{p.metric}}</b>{{p.metricLabel}}</div>
           <button type="button" data-item="{{p.id}}" class="go">ПОДРОБНЕЕ О ПРОЕКТЕ
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M7 7h10v10"/></svg>
           </button>
@@ -819,7 +813,7 @@
         <div><span>ПУБЛИЧНЫХ ПРОЕКТОВ</span><b>9</b></div>
         <div><span>ЯЗЫКОВ В РАБОТЕ</span><b>6</b></div>
         <div><span>ПЛАТФОРМ</span><b>4</b></div>
-        <div><span>СРЕДНИЙ ОТВЕТ</span><b>&lt; 1 дня</b></div>
+        <div><span>ОТВЕЧАЮ</span><b>В течение дня</b></div>
       </div>
     </div>
   </section>
@@ -918,23 +912,18 @@
 </div>
 
 <div class="layer">
+<div class="stage" aria-hidden="true">
+  <div class="stage-cap"><span class="slash">//</span> <span data-scramble>DEV WORKSPACE</span></div>
+</div>
+
 <section class="manifesto">
   <div class="wrap">
     <div class="reveal">
       <div class="kicker" style="font-size:10px;letter-spacing:0.2em;color:var(--ice);margin-bottom:22px"><span class="slash">//////</span> МАНИФЕСТ</div>
       <h2 class="wipe lead">Хорошая инженерия <b>незаметна</b>. Её видно только тогда, когда всё работает так, будто иначе и быть не могло.</h2>
     </div>
-    <div class="foot reveal">
-      <div><span>ПУБЛИЧНЫХ ПРОЕКТОВ</span><b data-count="9" data-suffix="">9</b></div>
-      <div><span>ЯЗЫКОВ В РАБОТЕ</span><b data-count="6" data-suffix="">6</b></div>
-      <div><span>ПЛАТФОРМ</span><b data-count="4" data-suffix="">4</b></div>
-    </div>
   </div>
 </section>
-
-<div class="stage" aria-hidden="true">
-  <div class="stage-cap"><span class="slash">//</span> <span data-scramble>DEV WORKSPACE</span></div>
-</div>
 
 <section class="contact">
   <div class="wrap reveal">
@@ -1183,70 +1172,69 @@ function _screen(V, F, rnd, c, u, v, nq, bg, tex, back) {
   }
 }
 var SRC_EDITOR = [
-  "import { useState } from 'react'",
-  "import { api } from './lib/api'",
-  'export function useProjects(id) {',
-  '  const [items, setItems] = useState([])',
-  '  const [busy, setBusy] = useState(true)',
-  '  useEffect(() => {',
-  "    api.get('/projects/' + id)",
-  '      .then(res => setItems(res.data))',
-  '      .finally(() => setBusy(false))',
-  '  }, [id])',
-  '  return { items, busy }',
+  '@Composable',
+  'fun ShelfLife(p: Product) {',
+  '  val left = p.expiresAt',
+  '    .daysFrom(today())',
+  '  Card(border = tint(left)) {',
+  '    Text(p.name, style = h6)',
+  '    Text(plural(left),',
+  '      color = warn(left))',
+  '    if (left < 3) Badge()',
+  '  }',
   '}'
 ];
 var SRC_DEPLOY = [
-  '$ deploy --prod',
-  ' build ...... ok',
-  ' assets 24 .. ok',
-  ' cache ...... ok',
-  ' dns ........ ok',
-  ' live alex.dev',
-  '$ status',
-  ' uptime 99.98%',
-  ' p95 142 ms',
+  '$ docker compose up -d',
+  ' postgres ... ok',
+  ' redis ...... ok',
+  ' worker ..... ok',
+  ' bot ........ ok',
+  '$ systemctl status',
+  ' active (running)',
+  ' polled 5 sites',
+  ' uptime 21d',
   ' errors 0'
 ];
 var SRC_TESTS = [
-  '$ npm test',
-  ' PASS api.test',
-  ' PASS hooks.test',
-  ' PASS utils.test',
-  ' PASS ui.test',
-  ' 42 passed',
+  '$ cargo test',
+  ' ok store::insert',
+  ' ok store::search',
+  ' ok sync::merge',
+  ' ok cmd::export',
+  ' 128 passed',
   ' 0 failed',
-  ' time 2.31 s',
-  ' coverage 94%'
+  ' time 4.02 s'
 ];
 var SRC_BUILD = [
-  'export function sum(a) {',
-  '  return a.reduce(add)',
-  '}',
-  'const t0 = Date.now()',
-  'await bundle(cfg)',
-  'await minify(cfg.out)',
-  'return Date.now() - t0'
+  'func (s *Svc) Active()',
+  '    ([]Unit, error) {',
+  '  out := make([]Unit, 0)',
+  '  for _, u := range s.units {',
+  '    if u.Running { out = add(out, u) }',
+  '  }',
+  '  return out, nil',
+  '}'
 ];
 var SRC_TERM = [
-  '$ npm run build',
-  ' 248 modules ok',
-  ' 142 kB -> 48 kB',
-  ' done in 3.4 s',
-  '$ npm run test'
+  '$ gradle assembleRelease',
+  ' 84 tasks ok',
+  ' apk 9.4 MB',
+  ' done in 41 s',
+  '$ adb install -r'
 ];
 var SRC_DIFF = [
-  '@@ -18,7 +18,9',
-  '- db.get(id)',
-  '+ cache.get(id)',
-  '+ ?? db.get(id)',
-  '  return json(u)'
+  '@@ -24,6 +24,8',
+  '- db.query(sql)?',
+  '+ cache.get_or(sql,',
+  '+   || db.query(sql))?',
+  '  Ok(rows)'
 ];
 var SRC_LOG = [
-  'GET  /api  200',
-  'POST /log  201',
-  'GET  /me   200',
-  'GET  /ping 204'
+  'drift open library.db',
+  'tags   42 ok',
+  'sync   profile ok',
+  'export signed ok'
 ];
 function buildDesk(seed, detail) {
   var V = [], F = [], rnd = seeded(seed), GROUPS = [];
@@ -1288,7 +1276,7 @@ function buildDesk(seed, detail) {
   _box(V, F, rnd, LX, hingeY, hingeZ, 0.40, 0.017, 0.019, 0, PAL.blue);
   var so = 0.020;
   _screen(V, F, rnd, [sc[0] + sn[0]*so, sc[1] + sn[1]*so, sc[2] + sn[2]*so], su, sv, sn, PAL.dark,
-    _mkTex(SRC_EDITOR, 'code', { w: 640, aspect: hw/hh, head: 'useProjects.ts', chrome: 'window', nums: 1, speed: 34, off: 0 }), null);
+    _mkTex(SRC_EDITOR, 'code', { w: 640, aspect: hw/hh, head: 'ShelfLife.kt', chrome: 'window', nums: 1, speed: 34, off: 0 }), null);
 
   _mark(lapFrom, [0.10, -1, 0.45]);
 
@@ -1306,7 +1294,7 @@ function buildDesk(seed, detail) {
   var ph2From = F.length;
   _box(V, F, rnd, 0.96, 0.18, -0.12, 0.178, 0.328, 0.014, qa, PAL.navy, 1);
   _screen(V, F, rnd, [0.96 + qn[0]*0.026, 0.18 + qn[1]*0.026, -0.12 + qn[2]*0.026], qu, qv, qn, PAL.dark,
-    _mkTex(SRC_TESTS, 'term', { w: 330, aspect: qhw/qhh, head: 'jest', chrome: 'phone', speed: 20, off: 4.4 }), PAL.navy);
+    _mkTex(SRC_TESTS, 'term', { w: 330, aspect: qhw/qhh, head: 'cargo', chrome: 'phone', speed: 20, off: 4.4 }), PAL.navy);
 
   _mark(ph2From, [0.75, -0.55, 0.38]);
 
@@ -1315,11 +1303,11 @@ function buildDesk(seed, detail) {
     _screen(V, F, rnd, [cx, cy, cz], uu, vv, nn, PAL.dark, tex, PAL.navy);
   }
   _float(-0.66, -0.30, -0.16, 0.42, 0.235, 0.185,
-    _mkTex(SRC_BUILD, 'code', { w: 440, aspect: 0.235/0.185, head: 'build.ts', chrome: 'window', speed: 26, off: 1.3 }));
+    _mkTex(SRC_BUILD, 'code', { w: 440, aspect: 0.235/0.185, head: 'service.go', chrome: 'window', speed: 26, off: 1.3 }));
   _float(-0.30, -0.68, -0.30, 0.26, 0.230, 0.170,
-    _mkTex(SRC_TERM, 'term', { w: 430, aspect: 0.230/0.170, head: 'terminal', chrome: 'window', speed: 24, off: 3.1 }));
+    _mkTex(SRC_TERM, 'term', { w: 430, aspect: 0.230/0.170, head: 'gradle', chrome: 'window', speed: 24, off: 3.1 }));
   _float(0.56, -0.50, -0.22, -0.34, 0.215, 0.180,
-    _mkTex(SRC_DIFF, 'diff', { w: 420, aspect: 0.215/0.180, head: 'user.ts', chrome: 'window', speed: 22, off: 5.2 }));
+    _mkTex(SRC_DIFF, 'diff', { w: 420, aspect: 0.215/0.180, head: 'store.rs', chrome: 'window', speed: 22, off: 5.2 }));
   _float(0.14, -0.80, -0.34, 0.12, 0.180, 0.120,
     _mkTex(SRC_LOG, 'term', { w: 390, aspect: 0.180/0.120, speed: 26, off: 6.4 }));
 
@@ -2612,7 +2600,7 @@ class Component extends DCLogic {
       endSmooth += (endRaw - endSmooth) * Math.min(1, 0.055 * dt);
       var diss = smoother(endSmooth);
       var swarmA = smoother((endSmooth - 0.30) / 0.62) * 0.62;
-      var sceneA = smoother(deskSmooth) * 0.92;
+      var sceneA = smoother(deskSmooth);
       sceneA = lerp(sceneA, 1, smoother((endSmooth - 0.02) / 0.30));
 
       var aberTarget = velSmooth * 0.22;
@@ -2652,7 +2640,7 @@ class Component extends DCLogic {
 
       ctx.globalCompositeOperation = 'lighter';
       var hg = ctx.createRadialGradient(cx, cy, 0, cx, cy, R * 3.2);
-      hg.addColorStop(0, 'rgba(' + iceStr + ',' + ((0.12 + 0.11*self._openAvg) * sceneA + 0.08*swarmA).toFixed(3) + ')');
+      hg.addColorStop(0, 'rgba(' + iceStr + ',' + ((0.20 + 0.13*self._openAvg) * sceneA + 0.08*swarmA).toFixed(3) + ')');
       hg.addColorStop(1, 'rgba(' + iceStr + ',0)');
       ctx.fillStyle = hg; ctx.fillRect(0, 0, W, H);
       ctx.globalCompositeOperation = 'source-over';
