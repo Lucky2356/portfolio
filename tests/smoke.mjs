@@ -7,8 +7,7 @@
 import { chromium } from 'playwright';
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
-import { extname, join, normalize } from 'node:path';
-import { dirname } from 'node:path';
+import { dirname, extname, join, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const DIST = join(dirname(fileURLToPath(import.meta.url)), '..', 'dist');
@@ -17,11 +16,30 @@ const TYPES = { '.html': 'text/html; charset=utf-8', '.jpg': 'image/jpeg',
 
 // Статика без зависимостей: сайту нужен сервер, потому что картинки лежат
 // отдельными файлами.
+//
+// Путь приходит из запроса, поэтому отдаём файл только после того, как
+// убедились, что итоговый путь остался внутри dist. Сервер локальный и живёт
+// секунды, но «путь из запроса напрямую в readFile» — ровно та форма, которую
+// незачем оставлять в репозитории.
+function resolveInside(root, urlPath) {
+  let decoded;
+  try {
+    decoded = decodeURIComponent(urlPath);
+  } catch {
+    return null;                       // битая %-последовательность
+  }
+  if (decoded.includes('\0')) return null;
+  const file = resolve(root, '.' + (decoded === '/' ? '/index.html' : decoded));
+  return file === root || file.startsWith(root + sep) ? file : null;
+}
+
 function serve() {
   const server = createServer(async (req, res) => {
-    const rel = normalize(decodeURIComponent(req.url.split('?')[0]))
-      .replace(/^(\.\.[/\\])+/, '');
-    const file = join(DIST, rel === '/' ? 'index.html' : rel);
+    const file = resolveInside(DIST, req.url.split('?')[0]);
+    if (!file) {
+      res.writeHead(403).end('forbidden');
+      return;
+    }
     try {
       const body = await readFile(file);
       res.writeHead(200, { 'content-type': TYPES[extname(file)] || 'application/octet-stream' });
