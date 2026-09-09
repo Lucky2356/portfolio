@@ -5,6 +5,10 @@
   "description": "Портфолио Alex — сайт в виде рабочего стола с 3D-сценой",
   "type": "module",
   "scripts": {
-    "build": "node scripts/build-site.mjs"
+    "build": "node scripts/build-site.mjs",
+    "test": "node tests/smoke.mjs"
+  },
+  "devDependencies": {
+    "playwright": "1.56.1"
   }
 }

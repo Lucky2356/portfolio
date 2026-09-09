@@ -3,16 +3,22 @@ name: build
 on:
   push:
     branches: [main]
+  # Сборка проверяется до слияния, а не после: проверки вложенности тегов,
+  # нераскрытых шаблонов и потерянных @keyframes живут именно в ней.
+  pull_request:
   workflow_dispatch:
 
+# Наименьшие права по умолчанию. Сборка идёт и на pull_request, ставит
+# зависимости и выполняет тесты — такой job не должен держать права на запись
+# в Pages и на выпуск OIDC-токена. Они нужны только выкладке и выданы ей ниже.
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
-  group: pages
-  cancel-in-progress: true
+  group: pages-${{ github.ref }}
+  # Прерывать выкладку на полпути нельзя — Pages останется в промежуточном
+  # состоянии. Новый запуск дожидается предыдущего.
+  cancel-in-progress: false
 
 jobs:
   build:
@@ -24,7 +30,14 @@ jobs:
           node-version: 20
       - name: Собрать сайт
         run: node scripts/build-site.mjs
+      - name: Поставить зависимости для тестов
+        run: npm ci --no-audit --no-fund
+      - name: Поставить Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Смоук-тесты в браузере
+        run: npm test
       - name: Загрузить сборку для Pages
+        if: github.event_name != 'pull_request'
         uses: actions/upload-pages-artifact@v3
         with:
           path: dist
@@ -34,8 +47,12 @@ jobs:
   # и режимом Settings → Pages → Source: GitHub Actions.
   deploy:
     needs: build
-    if: ${{ vars.DEPLOY_PAGES == 'true' }}
+    if: ${{ github.event_name == 'push' && vars.DEPLOY_PAGES == 'true' }}
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
