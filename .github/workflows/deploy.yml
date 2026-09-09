@@ -29,6 +29,12 @@ jobs:
           node-version: 20
       - name: Собрать сайт
         run: node scripts/build-site.mjs
+      - name: Поставить зависимости для тестов
+        run: npm ci --no-audit --no-fund
+      - name: Поставить Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Смоук-тесты в браузере
+        run: npm test
       - name: Загрузить сборку для Pages
         if: github.event_name != 'pull_request'
         uses: actions/upload-pages-artifact@v3
