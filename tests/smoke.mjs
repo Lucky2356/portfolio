@@ -155,7 +155,9 @@ async function settle(page, tries = 20) {
   await page.press('#term-input', 'Enter');
   await page.waitForTimeout(400);
   check('стек совпадает с разделом «Обо мне»', await page.evaluate(() => {
-    const inPage = [...document.querySelectorAll('.skill-row')]
+    // Область та же, что у самой команды: .skill-row переиспользован
+    // и на странице контактов, там уровней нет.
+    const inPage = [...document.querySelectorAll('.page[data-page="about"] .skill-row')]
       .map((r) => r.querySelector('span').textContent.trim() + ' — ' + r.querySelectorAll('.lvl i.on').length + '/5');
     const inTerm = [...document.querySelectorAll('#term-log div')]
       .map((d) => d.textContent.trim()).filter((t) => /— \d\/5$/.test(t));
