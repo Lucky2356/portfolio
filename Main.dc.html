@@ -471,20 +471,23 @@
     .nav.hidden { opacity: 0; pointer-events: none; }
 
     @media (max-width: 820px) {
-      .desktop { height: auto; min-height: 0; overflow: visible; display: flex; flex-direction: column;
-        padding: 88px 16px 34px; gap: 14px; }
+      /* overflow-x: clip, а не visible: прилёт иконок сдвигает их до 88vw
+         в сторону, и по горизонтали появляется прокрутка. clip, в отличие
+         от hidden, не делает секцию скролл-контейнером по вертикали. */
+      .desktop { height: auto; min-height: 0; overflow: visible; overflow-x: clip;
+        display: flex; flex-direction: column; padding: 88px 16px 34px; gap: 14px; }
       .dt-icons { position: static !important; height: auto !important; width: auto !important;
         left: auto !important; right: auto !important;
         display: grid; grid-template-columns: repeat(2, minmax(0,1fr));
         grid-template-rows: auto; grid-auto-flow: row; justify-content: stretch; gap: 10px; }
-      .dt-icon { position: static !important; left: auto !important; top: auto !important; width: 100% !important;
+      /* Сам прилёт на телефоне отключаем: жест «файлы падают на стол» здесь
+         не читается, а иконки пролетают через весь экран. Инлайновые --fx/--fy
+         приходят из разметки, поэтому нужен !important. */
+      .dt-icon { --fx: 0px !important; --fy: 0px !important; --fr: 0deg !important;
+        position: static !important; left: auto !important; top: auto !important; width: 100% !important;
         flex-direction: row; justify-content: flex-start; gap: 12px; padding: 12px 14px;
         border: 1px solid var(--border); border-radius: 10px; background: rgba(12,17,24,0.6); }
-      /* animation: none здесь не ставим: качание .ic на телефоне маскирует
-         переполнение по горизонтали от псевдоэлемента (см. отдельную задачу).
-         Пока это не починено, объявление всё равно ничего не отключало —
-         правило .dt-icon .ic шло ниже и перебивало его. */
-      .dt-icon .ic { width: 30px; height: 30px; flex: none; transform: none !important; }
+      .dt-icon .ic { width: 30px; height: 30px; flex: none; transform: none !important; animation: none; }
       .dt-icon .nm { text-align: left; max-width: none; font-size: 10px; }
       .dt-widget { order: -1; position: static; transform: none !important; width: 100%; max-width: none;
         display: block; padding: 24px 20px; }
