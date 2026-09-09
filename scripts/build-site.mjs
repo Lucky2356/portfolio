@@ -43,6 +43,32 @@ const script = src.slice(
   src.lastIndexOf('</script>')
 );
 
+// --- проверка: каждая анимация ссылается на существующие кадры ----
+// Удаление блока CSS легко уносит с собой @keyframes, лежащий между правилами:
+// анимация остаётся назначенной, но не запускается, и элемент навсегда
+// остаётся в стартовом состоянии (например, невидимым).
+{
+  const declared = new Set(
+    [...css.matchAll(/@keyframes\s+([\w-]+)/g)].map((m) => m[1]));
+  const used = new Set();
+  for (const m of css.matchAll(/animation(?:-name)?\s*:\s*([^;}]+)/g)) {
+    for (const part of m[1].split(',')) {
+      for (const tok of part.trim().split(/\s+/)) {
+        if (/^[a-zA-Z][\w-]*$/.test(tok)) used.add(tok);
+      }
+    }
+  }
+  const known = new Set(['none', 'infinite', 'forwards', 'backwards', 'both',
+    'normal', 'reverse', 'alternate', 'linear', 'ease', 'ease-in', 'ease-out',
+    'ease-in-out', 'steps', 'running', 'paused', 'initial', 'inherit', 'unset',
+    'var', 'cubic-bezier', 'alternate-reverse', 'step-start', 'step-end']);
+  const missing = [...used].filter((n) => !declared.has(n) && !known.has(n));
+  if (missing.length) {
+    throw new Error('анимация без @keyframes: ' + missing.join(', '));
+  }
+  console.log('анимации на месте:', declared.size, 'наборов кадров');
+}
+
 // --- данные из renderVals() --------------------------------------
 const PROPS = { ice: '#9fe4ff', detail: 'medium', scatter: 45, atmosphere: true };
 const dataFn = new Function(`
@@ -205,7 +231,12 @@ function rewriteImages(html, srcFor) {
     const name = shots.get(m[1]);
     const d = dims.get(name);
     let out = attrs.replace(m[0], ' ' + srcFor(name));
-    if (d && !/\swidth=/.test(out)) out += ` width="${d.w}" height="${d.h}"`;
+    if (d && !/\swidth=/.test(out)) {
+      out += ` width="${d.w}" height="${d.h}"`;
+      // Вертикальный скриншот в горизонтальной рамке нельзя обрезать по ширине:
+      // от экрана телефона остаётся одна полоска статус-бара.
+      if (d.h > d.w) out += ' data-portrait="1"';
+    }
     if (!/\sloading=/.test(out)) out += ' loading="lazy" decoding="async"';
     return `<img${out}>`;
   });
