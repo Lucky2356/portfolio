@@ -201,15 +201,19 @@ console.log('вложенность тегов в порядке');
 // сборки дешевле и, главное, ссылки работают без JS.
 let wired = 0;
 let hiddenLinks = 0;
-markup = markup.replace(/<a\s([^>]*?)data-url="([^"]*)"([^>]*?)>/g,
-  (whole, before, url, after) => {
-    // Незаполненный контакт не должен превращаться в мёртвую кнопку.
-    if (!url) { hiddenLinks++; return `<a ${before}data-url=""${after} hidden>`; }
-    if (!/^(https?:|mailto:)/i.test(url)) return whole;
-    if (/\bhref=/.test(before + after)) return whole;
-    wired++;
-    return `<a ${before}data-url="${url}" href="${url}"${after}>`;
-  });
+// Атрибуты забираем одним проходом, как в rewriteImages: два ленивых
+// квантификатора в одном шаблоне дают квадратичный откат на длинных тегах.
+markup = markup.replace(/<a\s([^>]*)>/g, (whole, attrs) => {
+  const m = /\sdata-url="([^"]*)"/.exec(' ' + attrs);
+  if (!m) return whole;
+  const url = m[1];
+  // Незаполненный контакт не должен превращаться в мёртвую кнопку.
+  if (!url) { hiddenLinks++; return `<a ${attrs} hidden>`; }
+  if (!/^(https?:|mailto:)/i.test(url)) return whole;
+  if (/\shref=/.test(' ' + attrs)) return whole;
+  wired++;
+  return `<a ${attrs} href="${url}">`;
+});
 console.log('href проставлен у', wired, 'ссылок, скрыто незаполненных:', hiddenLinks);
 
 // --- что осталось заполнить --------------------------------------

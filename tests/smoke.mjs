@@ -5,52 +5,14 @@
 //
 // Запуск:  npm test        (перед этим нужен npm run build)
 import { chromium } from 'playwright';
-import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
-import { dirname, extname, join, resolve, sep } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { dirname, join } from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const DIST = join(dirname(fileURLToPath(import.meta.url)), '..', 'dist');
-const TYPES = { '.html': 'text/html; charset=utf-8', '.jpg': 'image/jpeg',
-  '.png': 'image/png', '.svg': 'image/svg+xml' };
-
-// Статика без зависимостей: сайту нужен сервер, потому что картинки лежат
-// отдельными файлами.
-//
-// Путь приходит из запроса, поэтому отдаём файл только после того, как
-// убедились, что итоговый путь остался внутри dist. Сервер локальный и живёт
-// секунды, но «путь из запроса напрямую в readFile» — ровно та форма, которую
-// незачем оставлять в репозитории.
-function resolveInside(root, urlPath) {
-  let decoded;
-  try {
-    decoded = decodeURIComponent(urlPath);
-  } catch {
-    return null;                       // битая %-последовательность
-  }
-  if (decoded.includes('\0')) return null;
-  const file = resolve(root, '.' + (decoded === '/' ? '/index.html' : decoded));
-  return file === root || file.startsWith(root + sep) ? file : null;
-}
-
-function serve() {
-  const server = createServer(async (req, res) => {
-    const file = resolveInside(DIST, req.url.split('?')[0]);
-    if (!file) {
-      res.writeHead(403).end('forbidden');
-      return;
-    }
-    try {
-      const body = await readFile(file);
-      res.writeHead(200, { 'content-type': TYPES[extname(file)] || 'application/octet-stream' });
-      res.end(body);
-    } catch {
-      res.writeHead(404).end('not found');
-    }
-  });
-  return new Promise((ok) => server.listen(0, '127.0.0.1',
-    () => ok({ server, url: `http://127.0.0.1:${server.address().port}` })));
-}
+// Страница ничего не запрашивает по сети — картинки лежат рядом относительными
+// путями, — поэтому сервер не нужен, хватает file://.
+const url = pathToFileURL(join(DIST, 'index.html')).href;
 
 let failed = 0;
 const results = [];
@@ -60,7 +22,6 @@ function check(name, pass, detail = '') {
 }
 function group(name) { results.push('\n' + name); }
 
-const { server, url } = await serve();
 const browser = await chromium.launch();
 const pageErrors = [];
 
@@ -275,7 +236,6 @@ async function settle(page, tries = 20) {
 }
 
 await browser.close();
-server.close();
 
 console.log(results.join('\n'));
 const uniqueErrors = [...new Set(pageErrors)];
