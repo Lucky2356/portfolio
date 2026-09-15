@@ -53,6 +53,12 @@
     #frost { position: fixed; inset: 0; z-index: 46; pointer-events: none; opacity: 0;
       background: linear-gradient(180deg, rgba(200,236,255,0.44), rgba(140,200,235,0.08) 45%, rgba(200,236,255,0.34)); mix-blend-mode: screen; }
 
+    /* Первый в порядке фокуса: иначе до контента десять иконок стола. */
+    .skip { position: fixed; top: 10px; left: 10px; z-index: 100; padding: 12px 18px;
+      font: 500 11px/1 var(--mono); letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--bg-deep); background: var(--ice); border-radius: 10px; text-decoration: none;
+      transform: translateY(-160%); transition: transform 0.18s var(--ease); }
+    .skip:focus { transform: translateY(0); }
     .nav { position: fixed; top: 0; left: 0; right: 0; z-index: 30; display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 20px 40px; }
     .nav::after { content: ''; position: absolute; left: 0; right: 0; top: 0; bottom: 0; z-index: -1;
       background: linear-gradient(180deg, rgba(6,9,13,0.97) 34%, rgba(6,9,13,0.72) 72%, rgba(6,9,13,0)); }
@@ -633,8 +639,10 @@
   <div class="pct" id="load-pct">00%</div>
 </div>
 
-<canvas id="bg"></canvas>
-<canvas id="scene"></canvas>
+<a class="skip" href="#main">К содержимому</a>
+
+<canvas id="bg" aria-hidden="true"></canvas>
+<canvas id="scene" aria-hidden="true"></canvas>
 <div class="vignette"></div>
 <div id="frost"></div>
 <div class="grain"></div>
@@ -651,6 +659,8 @@
     <li class="in-up" style="animation-delay:.44s"><span class="rail-clock" id="top-clock">--<span class="cl">:</span>--</span></li>
   </ul>
 </nav>
+
+<main id="main">
 
 <header class="desktop" id="desktop">
   <div class="dt-icons" id="dt-icons">
@@ -691,7 +701,7 @@
         </button>
       </div>
       <div class="win-body term">
-        <div class="term-log" id="term-log"></div>
+        <div class="term-log" id="term-log" aria-live="polite" aria-atomic="false"></div>
         <div class="term-in"><span>$</span><input type="text" id="term-input" autocomplete="off" spellcheck="false" aria-label="Команда"></div>
       </div>
     </div>
@@ -705,7 +715,7 @@
           </button>
         </div>
         <div class="win-body">
-          <div class="preview shotbox"><canvas data-thumb="1"></canvas><img class="ov" src="{{p.shot1}}" alt="{{p.title}} — скриншот интерфейса"><span>{{p.idx}}</span></div>
+          <div class="preview shotbox"><canvas data-thumb="1" aria-hidden="true"></canvas><img class="ov" src="{{p.shot1}}" alt="{{p.title}} — скриншот интерфейса"><span>{{p.idx}}</span></div>
           <div class="tag"><span class="slash">//</span> {{p.tag}}</div>
           <h3>{{p.title}}</h3>
           <div class="win-case">
@@ -768,7 +778,7 @@
           <button type="button" class="pg-card st" data-item="{{p.id}}" style="{{p.pd}}">
             <span class="idx">{{p.idx}}</span>
             <svg class="arw" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M7 7h10v10"/></svg>
-            <span class="shotbox"><canvas data-thumb="1"></canvas><img class="ov" src="{{p.shot1}}" alt="{{p.title}} — скриншот интерфейса"></span>
+            <span class="shotbox"><canvas data-thumb="1" aria-hidden="true"></canvas><img class="ov" src="{{p.shot1}}" alt="{{p.title}} — скриншот интерфейса"></span>
             <span class="tag">{{p.tag}}</span>
             <span class="ttl">{{p.title}}</span>
             <span class="stk">{{p.stack}}</span>
@@ -791,7 +801,7 @@
       <div class="pg-head">
         <div>
           <div class="kicker st" style="--d:90ms"><span class="slash">//////</span> ОБО МНЕ</div>
-          <h2 class="st" style="--d:140ms">ALEX<br>FULL-STACK</h2>
+          <h2 class="st" style="--d:140ms">ALEX <br>FULL-STACK</h2>
         </div>
       </div>
       <p class="pg-lead st" style="--d:250ms">Начинал с вёрстки, вырос до продуктовой разработки полного цикла — от схемы базы данных до анимации в интерфейсе. Люблю задачи, где нужно разобрать сложное на части, понять, как оно устроено, и собрать заново — но лучше.</p>
@@ -837,7 +847,7 @@
       <div class="pg-head">
         <div>
           <div class="kicker st" style="--d:90ms"><span class="slash">//////</span> КОНТАКТЫ</div>
-          <h2 class="st" style="--d:140ms">ДАВАЙТЕ СОБЕРЁМ<br>ВАШ ПРОЕКТ</h2>
+          <h2 class="st" style="--d:140ms">РАССКАЖИТЕ <br>О ЗАДАЧЕ</h2>
         </div>
       </div>
       <p class="pg-lead st" style="--d:250ms">Расскажите, что нужно построить — отвечу в течение дня и предложу, как это лучше сделать.</p>
@@ -888,10 +898,10 @@
       </div>
       <div class="di-grid">
         <div class="di-media">
-          <div class="shotbox"><canvas data-shot="a"></canvas><img class="ov" src="{{p.shot1}}" alt="{{p.title}} — скриншот 1"></div>
+          <div class="shotbox"><canvas data-shot="a" aria-hidden="true"></canvas><img class="ov" src="{{p.shot1}}" alt="{{p.title}} — скриншот 1"></div>
           <div class="di-shots">
-            <div class="shotbox"><canvas data-shot="b"></canvas><img class="ov" src="{{p.shot2}}" alt="{{p.title}} — скриншот 2"></div>
-            <div class="shotbox"><canvas data-shot="c"></canvas><img class="ov" src="{{p.shot3}}" alt="{{p.title}} — скриншот 3"></div>
+            <div class="shotbox"><canvas data-shot="b" aria-hidden="true"></canvas><img class="ov" src="{{p.shot2}}" alt="{{p.title}} — скриншот 2"></div>
+            <div class="shotbox"><canvas data-shot="c" aria-hidden="true"></canvas><img class="ov" src="{{p.shot3}}" alt="{{p.title}} — скриншот 3"></div>
           </div>
         </div>
         <div class="di-body">
@@ -956,8 +966,11 @@
     <div style="margin-top:38px"><a data-url="{{links.email}}" class="pill" target="_blank" rel="noopener noreferrer">НАПИСАТЬ МНЕ</a></div>
   </div>
 </section>
+</div>
 
-<footer>
+</main>
+
+<footer class="layer">
   <div class="wrap foot-row">
     <span><span class="slash">//</span> © 2026 {{links.owner}}</span>
     <div class="socials">
@@ -965,7 +978,6 @@
     </div>
   </div>
 </footer>
-</div>
 </div>
 
 </x-dc>
@@ -1694,9 +1706,13 @@ class Component extends DCLogic {
     }
     function closeWin(id) {
       var w = root.querySelector('[data-win="' + id + '"]');
+      // Фокус был внутри окна — вернуть его на иконку, с которой окно открыли,
+      // иначе он падает на <body> и следующий Tab начинает обход заново.
+      var hadFocus = !!(w && w.contains(document.activeElement));
       if (w) { w.classList.remove('on'); w.style.transform = ''; w.style.opacity = ''; w.style.transition = ''; }
       var anchor = root.querySelector('[data-open="' + id + '"]');
       if (anchor) anchor.classList.remove('opened');
+      if (hadFocus && anchor && anchor.focus) anchor.focus();
       var b = openMap[id];
       if (b && b.parentNode) b.parentNode.removeChild(b);
       delete openMap[id];
@@ -1721,6 +1737,8 @@ class Component extends DCLogic {
       w.style.opacity = '0';
       minimized[id] = true;
       b.classList.add('min');
+      // Окно уехало в панель задач — фокус едет за ним, на его кнопку.
+      if (w.contains(document.activeElement) && b.focus) b.focus();
       setTimeout(function () {
         if (!minimized[id]) return;
         w.classList.remove('on');
@@ -2003,6 +2021,7 @@ class Component extends DCLogic {
       if (!toastEl) {
         toastEl = document.createElement('div');
         toastEl.className = 'dt-toast';
+        toastEl.setAttribute('role', 'status');
         root.appendChild(toastEl);
       }
       toastEl.textContent = msg;
@@ -2255,7 +2274,7 @@ class Component extends DCLogic {
       prevEl = document.createElement('div');
       prevEl.className = 'dt-prev';
       prevEl.innerHTML = '<div class="pbar"><i></i><i></i><i></i><b>ПРЕДПРОСМОТР</b></div>' +
-        '<span class="shotbox pshot"><canvas></canvas><img class="ov" src="" alt=""></span>' +
+        '<span class="shotbox pshot"><canvas aria-hidden="true"></canvas><img class="ov" src="" alt=""></span>' +
         '<div class="pt"></div><div class="ps"></div>' +
         '<div class="pl"><span>ОТКРЫТЬ ОКНО</span><span>КЛИК</span></div>';
       deskHost.appendChild(prevEl);
