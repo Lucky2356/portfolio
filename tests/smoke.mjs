@@ -63,6 +63,35 @@ async function settle(page, tries = 20) {
   check('в разметке не осталось base64', !html.includes('data:image/jpeg;base64'));
 }
 
+// --- мета для поисковиков -----------------------------------------
+{
+  group('Мета');
+  const html = await readFile(join(DIST, 'index.html'), 'utf8');
+
+  // getElementById молча возвращает первый из двух — сборка однажды
+  // заворачивала разметку во второй #dc-root поверх уже существующего.
+  const ids = [...html.matchAll(/\sid="([^"]+)"/g)].map((m) => m[1]);
+  check('id в собранной странице не повторяются', new Set(ids).size === ids.length,
+    ids.filter((x, i) => ids.indexOf(x) !== i).join(', ') || ids.length + ' шт.');
+
+  const ld = html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/);
+  check('JSON-LD присутствует и разбирается', !!ld && (() => {
+    try { return JSON.parse(ld[1])['@type'] === 'Person'; } catch { return false; }
+  })());
+  check('в JSON-LD те же контакты, что на странице', !!ld && (() => {
+    const p = JSON.parse(ld[1]);
+    // адрес, а не mailto:, и без пустых полей-заглушек
+    return !/^mailto:/.test(p.email || '')
+      && Object.values(p).every((v) => v !== '' && v !== null);
+  })());
+
+  const robots = await readFile(join(DIST, 'robots.txt'), 'utf8');
+  check('robots.txt указывает на карту сайта', /^Sitemap: https?:\/\/\S+sitemap\.xml$/m.test(robots));
+  const sitemap = await readFile(join(DIST, 'sitemap.xml'), 'utf8');
+  check('sitemap.xml ссылается на сам сайт', /<loc>https?:\/\/\S+<\/loc>/.test(sitemap)
+    && /<lastmod>\d{4}-\d{2}-\d{2}<\/lastmod>/.test(sitemap));
+}
+
 // --- десктоп ------------------------------------------------------
 {
   group('Рабочий стол 1440×900');

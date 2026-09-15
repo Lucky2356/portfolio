@@ -53,6 +53,30 @@ ${favicon}
 <meta name="twitter:description" content="${DESC}">
 <meta name="twitter:image" content="${SITE}img/financeapps-2.jpg">`;
 
+// Person для поисковиков: имя, роль и город, которые иначе приходится
+// вычитывать из анимированной вёрстки. Значения — те же CONTACTS, что и
+// на самой странице, чтобы не разъезжались.
+function personLd(links) {
+  const [city, country] = (links.city || '').split(',').map((x) => x.trim());
+  const sameAs = [links.github, links.linkedin, links.telegram].filter(Boolean);
+  const person = {
+    '@context': 'https://schema.org',
+    '@type': 'Person',
+    name: links.owner,
+    jobTitle: 'Full-stack разработчик',
+    description: DESC,
+    url: SITE,
+    email: links.emailText || undefined,   // schema.org ждёт адрес, не mailto:
+    knowsLanguage: links.languages ? links.languages.split('·').map((x) => x.trim()) : undefined,
+    address: city ? { '@type': 'PostalAddress', addressLocality: city, addressCountry: country || undefined } : undefined,
+    sameAs: sameAs.length ? sameAs : undefined,
+  };
+  // undefined-поля в JSON-LD не нужны: пустая строка хуже отсутствия.
+  const clean = JSON.parse(JSON.stringify(person));
+  return '<script type="application/ld+json">' +
+    JSON.stringify(clean).replace(/</g, '\\u003c') + '<\/script>';
+}
+
 const noJsCss = `<noscript><style>
 #loader { display: none !important; }
 .dt-icon, .in-up, .reveal, .st, .taskbar,
@@ -196,6 +220,22 @@ function checkNesting(html, where) {
 checkNesting(markup, 'разметка Main.dc.html');
 console.log('вложенность тегов в порядке');
 
+// --- проверка: id не повторяются ---------------------------------
+// Два элемента с одним id — невалидный HTML, а getElementById молча
+// возвращает первый: так сборка однажды заворачивала разметку во второй
+// #dc-root поверх того, что уже был в артборде.
+{
+  const seen = new Map();
+  for (const m of markup.matchAll(/\sid="([^"]+)"/g)) {
+    seen.set(m[1], (seen.get(m[1]) || 0) + 1);
+  }
+  const dup = [...seen].filter(([, n]) => n > 1);
+  if (dup.length) {
+    throw new Error('id повторяются: ' + dup.map(([k, n]) => `${k} ×${n}`).join(', '));
+  }
+  console.log(`id уникальны: ${seen.size} шт.`);
+}
+
 // --- настоящие href для внешних ссылок ---------------------------
 // wireLinks() в рантайме делает то же самое, но проставить href на этапе
 // сборки дешевле и, главное, ссылки работают без JS.
@@ -330,6 +370,8 @@ ${scriptRuntime}
 })();
 `;
 
+const ld = personLd(data.links);
+
 const page = `<!doctype html>
 <html lang="ru">
 <head>
@@ -339,12 +381,13 @@ const page = `<!doctype html>
 <meta name="description" content="${DESC}">
 <meta name="color-scheme" content="dark">
 ${meta}
+${ld}
 ${fontHead}
 <style>${css}</style>
 ${noJsCss}
 </head>
 <body>
-<div id="dc-root">${markupFiles}</div>
+${markupFiles}
 <script>${boot}</script>
 </body>
 </html>
@@ -355,7 +398,7 @@ const artifact = `<title>${TITLE}</title>
 ${fontHead}
 <style>${css}</style>
 ${noJsCss}
-<div id="dc-root">${markupInline}</div>
+${markupInline}
 <script>${inlineImgScript}${boot}<\/script>
 `;
 
@@ -364,5 +407,18 @@ mkdirSync(join(DIST, 'img'), { recursive: true });
 for (const [name, buf] of files) writeFileSync(join(DIST, 'img', name), buf);
 writeFileSync(join(DIST, 'index.html'), page, 'utf8');
 writeFileSync(join(DIST, 'portfolio-site.html'), artifact, 'utf8');
+
+// Без robots.txt и sitemap.xml поисковик обходит сайт вслепую, а на
+// GitHub Pages положить их больше некому — статика собирается здесь.
+const today = new Date().toISOString().slice(0, 10);
+writeFileSync(join(DIST, 'robots.txt'),
+  `User-agent: *\nAllow: /\n\nSitemap: ${SITE}sitemap.xml\n`, 'utf8');
+writeFileSync(join(DIST, 'sitemap.xml'),
+  '<?xml version="1.0" encoding="UTF-8"?>\n' +
+  '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
+  `  <url>\n    <loc>${SITE}</loc>\n    <lastmod>${today}</lastmod>\n` +
+  '    <changefreq>monthly</changefreq>\n    <priority>1.0</priority>\n  </url>\n' +
+  '</urlset>\n', 'utf8');
+console.log('dist/robots.txt и dist/sitemap.xml');
 console.log('dist/index.html', Math.round(page.length / 1024) + ' KB');
 console.log('dist/portfolio-site.html', Math.round(artifact.length / 1024) + ' KB');
