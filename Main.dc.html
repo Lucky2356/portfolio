@@ -63,6 +63,15 @@
       transform: scaleX(0); transform-origin: right; transition: transform 0.55s var(--ease); }
     .nav-links button:hover { color: var(--text); }
     .nav-links button:hover::after { transform: scaleX(1); transform-origin: left; }
+    /* Переключатель языка — ссылка, а не кнопка: он ведёт на другую страницу,
+       и правым кликом его должно быть можно открыть в новой вкладке. */
+    .nav-links .lang { position: relative; padding: 3px 0; text-decoration: none;
+      font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.18em;
+      color: var(--text-dim); transition: color 0.4s var(--ease); }
+    .nav-links .lang::after { content: ''; position: absolute; left: 0; right: 0; bottom: -3px; height: 1px; background: var(--ice);
+      transform: scaleX(0); transform-origin: right; transition: transform 0.55s var(--ease); }
+    .nav-links .lang:hover { color: var(--text); }
+    .nav-links .lang:hover::after { transform: scaleX(1); transform-origin: left; }
     .nav-links .rail-sep { display: flex; align-items: center; gap: 8px; padding-left: 12px; border-left: 1px solid var(--border);
       font-size: 10.5px; letter-spacing: 0.16em; color: var(--text-dim); }
     .nav-links .rail-sep .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--ice);
@@ -647,6 +656,7 @@
     <li class="in-up" style="animation-delay:.18s"><button type="button" data-page="work">РАБОТЫ</button></li>
     <li class="in-up" style="animation-delay:.25s"><button type="button" data-page="about">ОБО МНЕ</button></li>
     <li class="in-up" style="animation-delay:.32s"><button type="button" data-page="contact">КОНТАКТЫ</button></li>
+    <li class="in-up" style="animation-delay:.35s"><a class="lang" id="lang-switch" href="en/" hreflang="en" lang="en">EN</a></li>
     <li class="in-up rail-sep" style="animation-delay:.38s"><span class="dot"></span>ONLINE</li>
     <li class="in-up" style="animation-delay:.44s"><span class="rail-clock" id="top-clock">--<span class="cl">:</span>--</span></li>
   </ul>

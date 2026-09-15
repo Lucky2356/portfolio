@@ -216,6 +216,102 @@ async function settle(page, tries = 20) {
   await ctx.close();
 }
 
+// --- английская версия --------------------------------------------
+{
+  group('Английская версия');
+  const enUrl = pathToFileURL(join(DIST, 'en', 'index.html')).href;
+  const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+  const page = await ctx.newPage();
+  const enErrors = [];
+  page.on('pageerror', (e) => enErrors.push(String(e.message)));
+  await page.goto(enUrl, { waitUntil: 'load' });
+  await page.waitForTimeout(2800);
+  await settle(page);
+
+  // Перевод кладётся обратно в строковый литерал той же кавычки: из-за
+  // апострофа в «HI, I'M» страница один раз упала с SyntaxError.
+  check('страница работает без ошибок скрипта', enErrors.length === 0, enErrors[0] || '');
+
+  const head = await page.evaluate(() => ({
+    lang: document.documentElement.lang,
+    title: document.title,
+    hreflang: [...document.querySelectorAll('link[hreflang]')].map((l) => l.hreflang).sort().join(','),
+    canonical: document.querySelector('link[rel=canonical]')?.getAttribute('href') || '',
+    ldLang: (() => {
+      const el = document.querySelector('script[type="application/ld+json"]');
+      try { return JSON.parse(el.textContent).jobTitle; } catch { return null; }
+    })(),
+  }));
+  check('<html lang="en">', head.lang === 'en', head.lang);
+  check('заголовок и описание английские', /full-stack developer/i.test(head.title), head.title);
+  check('hreflang в обе стороны и x-default', head.hreflang === 'en,ru,x-default', head.hreflang);
+  check('canonical указывает на /en/', head.canonical.endsWith('/en/'), head.canonical);
+  check('JSON-LD тоже переведён', head.ldLang === 'Full-stack developer', String(head.ldLang));
+
+  // Главное: в видимом тексте не должно остаться ни одной русской буквы.
+  // Комментарии внутри <script> остаются русскими намеренно — их не видно,
+  // и переводить исходник вместе со страницей смысла нет. Подсказка
+  // переключателя тоже русская: она адресована тому, кто ищет русскую
+  // версию, и для этого помечена lang="ru".
+  const leftovers = await page.evaluate(() => {
+    const bad = new Set();
+    const ru = (el) => el && el.closest('[lang="ru"], script, style');
+    const walk = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+    for (let n = walk.nextNode(); n; n = walk.nextNode()) {
+      const t = n.textContent.trim();
+      if (t && /[А-Яа-яЁё]/.test(t) && !ru(n.parentElement)) bad.add(t.slice(0, 60));
+    }
+    document.querySelectorAll('[alt], [aria-label], [title]').forEach((el) => {
+      if (ru(el)) return;
+      ['alt', 'aria-label', 'title'].forEach((a) => {
+        const v = el.getAttribute(a);
+        if (v && /[А-Яа-яЁё]/.test(v)) bad.add(a + '="' + v.slice(0, 50) + '"');
+      });
+    });
+    return [...bad];
+  });
+  check('русского текста не осталось', leftovers.length === 0, leftovers.slice(0, 3).join(' / '));
+
+  // Терминал переведён не в разметке, а в строках скрипта — отдельный путь.
+  await page.click('.dt-icon[data-open="term"]');
+  await page.waitForTimeout(700);
+  await page.fill('#term-input', 'help');
+  await page.press('#term-input', 'Enter');
+  await page.waitForTimeout(400);
+  check('вывод терминала английский', await page.evaluate(() => {
+    const t = document.getElementById('term-log').textContent;
+    return /Commands:/.test(t) && !/[А-Яа-яЁё]/.test(t);
+  }));
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(400);
+
+  // Картинки лежат этажом выше: en/index.html ссылается на ../img/.
+  await page.click('.nav-links button[data-page="work"]');
+  await page.waitForTimeout(1500);
+  check('скриншоты грузятся из ../img/', await page.evaluate(() =>
+    [...document.querySelectorAll('.pg-card img.ov')].filter((i) => i.naturalWidth > 0).length > 0),
+    await page.evaluate(() => document.querySelector('.pg-card img.ov')?.getAttribute('src') || ''));
+
+  // Переключатель должен вести обратно, а не на самого себя.
+  const sw = await page.evaluate(() => {
+    const a = document.getElementById('lang-switch');
+    return { label: a?.textContent.trim(), href: a?.getAttribute('href'), lang: a?.getAttribute('lang') };
+  });
+  check('переключатель ведёт на русскую версию',
+    sw.label === 'RU' && sw.href === '../' && sw.lang === 'ru', JSON.stringify(sw));
+  await ctx.close();
+
+  // …и в обратную сторону с русской страницы.
+  const { ctx: rc, page: rp } = await open();
+  const rsw = await rp.evaluate(() => {
+    const a = document.getElementById('lang-switch');
+    return { label: a?.textContent.trim(), href: a?.getAttribute('href'), lang: a?.getAttribute('lang') };
+  });
+  check('с русской страницы переключатель ведёт в /en/',
+    rsw.label === 'EN' && rsw.href === 'en/' && rsw.lang === 'en', JSON.stringify(rsw));
+  await rc.close();
+}
+
 // --- без JS -------------------------------------------------------
 {
   group('Без JavaScript');
