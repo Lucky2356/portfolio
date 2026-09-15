@@ -8,6 +8,7 @@
 import { readFileSync, writeFileSync, mkdirSync, rmSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { EN, PATTERNS, PAGE_EN } from './i18n-en.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const DIST = join(ROOT, 'dist');
@@ -38,34 +39,52 @@ const favicon = '<link rel="icon" href="data:image/svg+xml,' + encodeURIComponen
   '<path d="M6 8h20v14H6z" fill="none" stroke="#9fe4ff" stroke-width="2"/>' +
   '<path d="M6 12h20M13 22v3h6v-3M10 25h12" fill="none" stroke="#9fe4ff" stroke-width="2"/>' +
   '</svg>') + '">';
-const meta = `<link rel="canonical" href="${SITE}">
+const EN_URL = SITE + 'en/';
+const OG_IMG = SITE + 'img/financeapps-2.jpg';
+const RU_PAGE = {
+  lang: 'ru',
+  title: TITLE,
+  desc: DESC,
+  ogLocale: 'ru_RU',
+  ogImageAlt: 'Экран финансового помощника — одного из проектов в портфолио',
+  jobTitle: 'Full-stack разработчик',
+};
+
+// hreflang в обе стороны: без него поисковик считает две версии дубликатами
+// и выбирает одну сам, а вторую прячет.
+function metaFor(t, url) {
+  return `<link rel="canonical" href="${url}">
+<link rel="alternate" hreflang="ru" href="${SITE}">
+<link rel="alternate" hreflang="en" href="${EN_URL}">
+<link rel="alternate" hreflang="x-default" href="${SITE}">
 ${favicon}
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="ALEX.DEV">
-<meta property="og:locale" content="ru_RU">
-<meta property="og:url" content="${SITE}">
-<meta property="og:title" content="${TITLE}">
-<meta property="og:description" content="${DESC}">
-<meta property="og:image" content="${SITE}img/financeapps-2.jpg">
-<meta property="og:image:alt" content="Экран финансового помощника — одного из проектов в портфолио">
+<meta property="og:locale" content="${t.ogLocale}">
+<meta property="og:url" content="${url}">
+<meta property="og:title" content="${t.title}">
+<meta property="og:description" content="${t.desc}">
+<meta property="og:image" content="${OG_IMG}">
+<meta property="og:image:alt" content="${t.ogImageAlt}">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="${TITLE}">
-<meta name="twitter:description" content="${DESC}">
-<meta name="twitter:image" content="${SITE}img/financeapps-2.jpg">`;
+<meta name="twitter:title" content="${t.title}">
+<meta name="twitter:description" content="${t.desc}">
+<meta name="twitter:image" content="${OG_IMG}">`;
+}
 
 // Person для поисковиков: имя, роль и город, которые иначе приходится
 // вычитывать из анимированной вёрстки. Значения — те же CONTACTS, что и
 // на самой странице, чтобы не разъезжались.
-function personLd(links) {
+function personLd(links, t, url) {
   const [city, country] = (links.city || '').split(',').map((x) => x.trim());
   const sameAs = [links.github, links.linkedin, links.telegram].filter(Boolean);
   const person = {
     '@context': 'https://schema.org',
     '@type': 'Person',
     name: links.owner,
-    jobTitle: 'Full-stack разработчик',
-    description: DESC,
-    url: SITE,
+    jobTitle: t.jobTitle,
+    description: t.desc,
+    url: url,
     email: links.emailText || undefined,   // schema.org ждёт адрес, не mailto:
     knowsLanguage: links.languages ? links.languages.split('·').map((x) => x.trim()) : undefined,
     address: city ? { '@type': 'PostalAddress', addressLocality: city, addressCountry: country || undefined } : undefined,
@@ -268,6 +287,78 @@ console.log('href проставлен у', wired, 'ссылок, скрыто �
   }
 }
 
+// --- перевод: русский артборд → английская страница ---------------
+// Подстановка идёт по точному совпадению целой строки. Частичных замен нет
+// специально: иначе «ЯЗЫКОВ» съело бы половину «ЯЗЫКОВ В РАБОТЕ», а порядок
+// ключей в словаре начал бы влиять на результат.
+const CYR = /[А-Яа-яЁё]/;
+const used = new Set();
+function tr(str) {
+  const key = str.trim();
+  if (!CYR.test(key)) return str;
+  if (Object.prototype.hasOwnProperty.call(EN, key)) {
+    used.add(key);
+    return str.replace(key, EN[key]);
+  }
+  for (const [re, to] of PATTERNS) {
+    const m = key.match(re);
+    if (!m) continue;
+    // Захваченные группы — это, как правило, название проекта, и оно тоже
+    // может быть в словаре («Финансовый помощник» → «Finance Assistant»).
+    const parts = m.slice(1).map((g) => {
+      if (!Object.prototype.hasOwnProperty.call(EN, g)) return g;
+      used.add(g);
+      return EN[g];
+    });
+    return str.replace(key, to.replace(/\$(\d+)/g, (_, n) => parts[n - 1]));
+  }
+  return str;
+}
+
+// Текстовые узлы и те атрибуты, которые видит пользователь.
+const TEXT_ATTRS = /\s(alt|aria-label|title|placeholder|data-title)="([^"]*)"/g;
+function translateMarkup(html) {
+  return html
+    .split(/(<[^>]+>)/)
+    .map((part) => (part.startsWith('<')
+      ? part.replace(TEXT_ATTRS, (m, name, val) => ` ${name}="${tr(val).replace(/"/g, '&quot;')}"`)
+      : tr(part)))
+    .join('');
+}
+
+// В скрипте переводится только содержимое строковых литералов целиком —
+// код и имена полей не трогаются.
+function translateScript(js) {
+  return js.replace(/'((?:[^'\\\n]|\\.)*)'|"((?:[^"\\\n]|\\.)*)"/g, (m) => {
+    const q = m[0];
+    const inner = m.slice(1, -1);
+    if (!CYR.test(inner)) return m;
+    // Перевод кладётся обратно в литерал той же кавычки, поэтому свою
+    // кавычку в нём нужно экранировать: из-за «HI, I'M» страница иначе
+    // падала с SyntaxError, а не просто выглядела не так.
+    const out = tr(inner).replace(/\\/g, '\\\\').replace(new RegExp(q, 'g'), '\\' + q);
+    return q + out + q;
+  });
+}
+
+// Непереведённая строка роняет сборку и печатается списком: недоделанный
+// перевод физически не попадёт в main.
+function checkTranslated(html, where) {
+  const left = new Set();
+  html.split(/(<[^>]+>)/).forEach((part) => {
+    if (part.startsWith('<')) {
+      for (const m of part.matchAll(TEXT_ATTRS)) if (CYR.test(m[2])) left.add(m[2].trim());
+      return;
+    }
+    const t = part.trim();
+    if (t && CYR.test(t)) left.add(t);
+  });
+  if (left.size) {
+    throw new Error(`${where}: ${left.size} строк без перевода — допишите их в scripts/i18n-en.mjs:\n` +
+      [...left].map((x) => `  '${x.slice(0, 90)}': '',`).join('\n'));
+  }
+}
+
 // --- картинки: из base64 в отдельные файлы -----------------------
 // Каждый из 15 скриншотов встречался в разметке 2-4 раза (окно, карточка
 // в сетке, подробная карточка) — 1,14 МБ из 1,4 МБ страницы, и три четверти
@@ -370,35 +461,61 @@ ${scriptRuntime}
 })();
 `;
 
-const ld = personLd(data.links);
+// Переключатель языка ведёт в разные стороны с разных страниц.
+function wireSwitch(html, href, label, lang, title) {
+  return html.replace(
+    /<a class="lang" id="lang-switch"[^>]*>[^<]*<\/a>/,
+    `<a class="lang" id="lang-switch" href="${href}" hreflang="${lang}" lang="${lang}" title="${title}">${label}</a>`);
+}
 
-const page = `<!doctype html>
-<html lang="ru">
+function buildPage(t, url, markup, script, { imgPrefix = '', switchTo }) {
+  let m = wireSwitch(markup, switchTo.href, switchTo.label, switchTo.lang, switchTo.title);
+  if (imgPrefix) m = m.replace(/src="img\//g, `src="${imgPrefix}img/`);
+  return `<!doctype html>
+<html lang="${t.lang}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>${TITLE}</title>
-<meta name="description" content="${DESC}">
+<title>${t.title}</title>
+<meta name="description" content="${t.desc}">
 <meta name="color-scheme" content="dark">
-${meta}
-${ld}
+${metaFor(t, url)}
+${personLd(t.links, t, url)}
 ${fontHead}
 <style>${css}</style>
 ${noJsCss}
 </head>
 <body>
-${markupFiles}
-<script>${boot}</script>
+${m}
+<script>${script}</script>
 </body>
 </html>
 `;
+}
+
+// --- английская версия ------------------------------------------------
+const EN_PAGE = { ...PAGE_EN, lang: 'en' };
+const markupEn = translateMarkup(markupFiles);
+const bootEn = translateScript(boot);
+checkTranslated(markupEn, 'английская разметка');
+EN_PAGE.links = Object.fromEntries(
+  Object.entries(data.links).map(([k, v]) => [k, typeof v === 'string' ? tr(v) : v]));
+// Имя владельца одинаково на обоих языках, а вот город и формат — нет.
+const unusedKeys = Object.keys(EN).filter((k) => !used.has(k));
+
+const RU_SWITCH = { href: 'en/', label: 'EN', lang: 'en', title: 'Read this in English' };
+const EN_SWITCH = { href: '../', label: PAGE_EN.switchLabel, lang: 'ru', title: PAGE_EN.switchTitle };
+
+RU_PAGE.links = data.links;
+const page = buildPage(RU_PAGE, SITE, markupFiles, boot, { switchTo: RU_SWITCH });
+const pageEn = buildPage(EN_PAGE, EN_URL, markupEn, bootEn, { imgPrefix: '../', switchTo: EN_SWITCH });
 
 // вариант для публикации артефактом: без doctype/html/head/body
 const artifact = `<title>${TITLE}</title>
 ${fontHead}
 <style>${css}</style>
 ${noJsCss}
-${markupInline}
+${wireSwitch(markupInline, SITE + 'en/', 'EN', 'en', RU_SWITCH.title)}
 <script>${inlineImgScript}${boot}<\/script>
 `;
 
@@ -406,7 +523,11 @@ rmSync(DIST, { recursive: true, force: true });
 mkdirSync(join(DIST, 'img'), { recursive: true });
 for (const [name, buf] of files) writeFileSync(join(DIST, 'img', name), buf);
 writeFileSync(join(DIST, 'index.html'), page, 'utf8');
+mkdirSync(join(DIST, 'en'), { recursive: true });
+writeFileSync(join(DIST, 'en', 'index.html'), pageEn, 'utf8');
 writeFileSync(join(DIST, 'portfolio-site.html'), artifact, 'utf8');
+console.log(`перевод: ${used.size} строк подставлено` +
+  (unusedKeys.length ? `, ${unusedKeys.length} в словаре не понадобились` : ''));
 
 // Без robots.txt и sitemap.xml поисковик обходит сайт вслепую, а на
 // GitHub Pages положить их больше некому — статика собирается здесь.
@@ -416,8 +537,9 @@ writeFileSync(join(DIST, 'robots.txt'),
 writeFileSync(join(DIST, 'sitemap.xml'),
   '<?xml version="1.0" encoding="UTF-8"?>\n' +
   '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
-  `  <url>\n    <loc>${SITE}</loc>\n    <lastmod>${today}</lastmod>\n` +
-  '    <changefreq>monthly</changefreq>\n    <priority>1.0</priority>\n  </url>\n' +
+  [SITE, EN_URL].map((u) =>
+    `  <url>\n    <loc>${u}</loc>\n    <lastmod>${today}</lastmod>\n` +
+    '    <changefreq>monthly</changefreq>\n    <priority>1.0</priority>\n  </url>\n').join('') +
   '</urlset>\n', 'utf8');
 console.log('dist/robots.txt и dist/sitemap.xml');
 console.log('dist/index.html', Math.round(page.length / 1024) + ' KB');
