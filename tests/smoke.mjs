@@ -167,6 +167,96 @@ async function settle(page, tries = 20) {
   await ctx.close();
 }
 
+// --- доступность --------------------------------------------------
+{
+  group('Доступность');
+  const { ctx, page } = await open();
+
+  // Landmark-а <main> не было вовсе, а подвал лежал внутри .layer.
+  const marks = await page.evaluate(() => ({
+    mains: document.querySelectorAll('main').length,
+    footerOutside: !document.querySelector('main footer') && !!document.querySelector('footer'),
+    headerInside: !!document.querySelector('main > header.desktop'),
+  }));
+  check('ровно один <main>', marks.mains === 1, marks.mains + ' шт.');
+  check('подвал остался отдельным landmark-ом', marks.footerOutside);
+  check('рабочий стол внутри <main>', marks.headerInside);
+
+  // До контента клавиатурой шли три кнопки навигации и десять иконок стола.
+  await page.keyboard.press('Tab');
+  await page.waitForTimeout(400);
+  check('первый Tab ведёт на скип-ссылку', await page.evaluate(() => {
+    const a = document.activeElement;
+    return a.classList.contains('skip') && a.getAttribute('href') === '#main';
+  }));
+  check('скип-ссылка при фокусе видна и сверху', await page.evaluate(() => {
+    const a = document.querySelector('.skip');
+    const r = a.getBoundingClientRect();
+    if (r.top < 0 || r.top > 80 || r.width < 40) return false;
+    return document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2) === a;
+  }));
+
+  // 47 декоративных холстов озвучивались скринридером как пустые элементы.
+  check('декоративные canvas скрыты от скринридера', await page.evaluate(() =>
+    [...document.querySelectorAll('canvas')].every((c) => c.closest('[aria-hidden="true"]'))),
+    await page.evaluate(() => document.querySelectorAll('canvas').length + ' шт. всего'));
+
+  // Вывод терминала появлялся молча.
+  check('вывод терминала озвучивается',
+    await page.evaluate(() => document.getElementById('term-log').getAttribute('aria-live') === 'polite'));
+
+  // <br> не даёт словораздела: заголовки читались как «ALEXFULL-STACK».
+  check('в заголовках нет слипшихся слов', await page.evaluate(() =>
+    [...document.querySelectorAll('h2')].every((h) => !/[а-яёa-z][А-ЯЁA-Z]/.test(h.textContent.replace(/\s+/g, ' ')))),
+    await page.evaluate(() => [...document.querySelectorAll('h2')]
+      .map((h) => h.textContent.replace(/\s+/g, ' ').trim()).filter((t) => /[а-яёa-z][А-ЯЁA-Z]/.test(t)).join(' / ') || 'все с пробелами'));
+
+  // Два заголовка читались одинаково и были неразличимы в списке заголовков.
+  check('заголовки не повторяют друг друга', await page.evaluate(() => {
+    const t = [...document.querySelectorAll('h2')].map((h) => h.textContent.replace(/\s+/g, ' ').trim());
+    return new Set(t).size === t.length;
+  }));
+
+  // Закрытое окно роняло фокус на <body>, и Tab начинал обход заново.
+  await page.click('.dt-icon[data-open="p1"]');
+  await page.waitForTimeout(900);
+  await page.click('[data-win="p1"] .win-min');
+  await page.waitForTimeout(900);
+  check('свёрнутое окно уводит фокус на кнопку панели',
+    await page.evaluate(() => document.activeElement.classList.contains('tb-btn')));
+  await page.click('.tb-btn.min');
+  await page.waitForTimeout(900);
+  await page.click('[data-win="p1"] .win-x');
+  await page.waitForTimeout(900);
+  check('закрытое окно возвращает фокус на иконку',
+    await page.evaluate(() => document.activeElement.getAttribute('data-open') === 'p1'));
+
+  // А если фокус был не в окне — угонять его нельзя.
+  await page.click('.dt-icon[data-open="p2"]');
+  await page.waitForTimeout(800);
+  await page.evaluate(() => document.querySelector('.nav-links button').focus());
+  await page.evaluate(() => document.querySelector('[data-win="p2"] .win-x').click());
+  await page.waitForTimeout(700);
+  check('закрытие чужого окна не угоняет фокус',
+    await page.evaluate(() => document.activeElement.dataset.page === 'work'));
+
+  // Карточка проекта — настоящая модалка: Tab не должен из неё выходить.
+  await page.click('.nav-links button[data-page="work"]');
+  await page.waitForTimeout(1400);
+  await page.click('.pg-card[data-item="p4"]');
+  await page.waitForTimeout(1000);
+  check('фокус не выходит за пределы карточки проекта', await page.evaluate(() => {
+    const box = document.querySelector('.pg-item.on');
+    const f = box.querySelectorAll('a[href], button:not([disabled]), input, [tabindex]:not([tabindex="-1"])');
+    if (!f.length) return false;
+    f[f.length - 1].focus();
+    const ev = new KeyboardEvent('keydown', { key: 'Tab', bubbles: true, cancelable: true });
+    window.dispatchEvent(ev);
+    return ev.defaultPrevented && box.contains(document.activeElement);
+  }));
+  await ctx.close();
+}
+
 // --- терминал -----------------------------------------------------
 {
   group('Терминал');
@@ -184,7 +274,9 @@ async function settle(page, tries = 20) {
   await page.press('#term-input', 'Enter');
   await page.waitForTimeout(400);
   check('стек совпадает с разделом «Обо мне»', await page.evaluate(() => {
-    const inPage = [...document.querySelectorAll('.skill-row')]
+    // Область та же, что у самой команды: .skill-row переиспользован
+    // и на странице контактов, там уровней нет.
+    const inPage = [...document.querySelectorAll('.page[data-page="about"] .skill-row')]
       .map((r) => r.querySelector('span').textContent.trim() + ' — ' + r.querySelectorAll('.lvl i.on').length + '/5');
     const inTerm = [...document.querySelectorAll('#term-log div')]
       .map((d) => d.textContent.trim()).filter((t) => /— \d\/5$/.test(t));

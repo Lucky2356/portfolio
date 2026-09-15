@@ -100,6 +100,19 @@ export const EN = {
   'ФОРМАТ': 'FORMAT',
   'СКАЧАТЬ РЕЗЮМЕ · PDF': 'DOWNLOAD CV · PDF',
   'КАК РАБОТАЮ': 'HOW I WORK',
+  'Разбираемся в задаче': 'Understanding the problem',
+  'Созвон на полчаса: что нужно, для кого и в какие сроки.':
+    'A half-hour call: what is needed, who for, and by when.',
+  'Оценка и план': 'Estimate and plan',
+  'Разбиваю на этапы, называю сроки и стоимость до старта.':
+    'I break it into stages and name the timeline and cost before we start.',
+  'Разработка': 'Development',
+  'Демо каждую неделю, доступ к репозиторию с первого дня.':
+    'A demo every week, and access to the repository from day one.',
+  'Запуск и поддержка': 'Launch and support',
+  'Релиз, метрики, поддержка после сдачи.': 'Release, metrics, support after handover.',
+  'Девять проектов: продуктовые приложения, внутренние инструменты и библиотеки. На главной они же лежат файлами на рабочем столе — каждый открывается в своём окне.':
+    'Nine projects: product applications, internal tools and libraries. On the home page the same ones sit as files on the desktop — each opens in its own window.',
   'ДЕТАЛИ': 'DETAILS',
 
   // значения CONTACTS
